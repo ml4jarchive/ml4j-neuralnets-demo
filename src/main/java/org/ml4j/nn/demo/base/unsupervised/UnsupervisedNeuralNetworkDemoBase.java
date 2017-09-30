@@ -16,8 +16,8 @@ package org.ml4j.nn.demo.base.unsupervised;
 
 import org.ml4j.MatrixFactory;
 import org.ml4j.nn.NeuralNetworkContext;
-import org.ml4j.nn.UnsupervisedNeuralNetwork;
 import org.ml4j.nn.neurons.NeuronsActivation;
+import org.ml4j.nn.unsupervised.UnsupervisedNeuralNetwork;
 
 /**
  * Base class for test harness to train and showcase an UnsupervisedNeuralNetwork.
