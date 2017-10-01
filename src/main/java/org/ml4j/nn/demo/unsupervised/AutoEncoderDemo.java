@@ -23,6 +23,8 @@ import org.ml4j.nn.demo.base.unsupervised.UnsupervisedNeuralNetworkDemoBase;
 import org.ml4j.nn.demo.util.MnistUtils;
 import org.ml4j.nn.demo.util.PixelFeaturesMatrixCsvDataExtractor;
 import org.ml4j.nn.layers.FeedForwardLayer;
+import org.ml4j.nn.neurons.Neurons;
+import org.ml4j.nn.neurons.Neurons3D;
 import org.ml4j.nn.neurons.NeuronsActivation;
 import org.ml4j.nn.neurons.NeuronsActivationFeatureOrientation;
 import org.ml4j.nn.unsupervised.AutoEncoder;
@@ -55,8 +57,11 @@ public class AutoEncoderDemo
 
     // Construct a 2 layer AutoEncoderMock
 
-    FeedForwardLayer<?> encodingLayer = new FeedForwardLayerMock(784, 100);
-    FeedForwardLayer<?> decodingLayer = new FeedForwardLayerMock(100, 784);
+    FeedForwardLayer<?, ?> encodingLayer = new FeedForwardLayerMock(
+        new Neurons3D(28, 28 ,1, false), new Neurons(100, false));
+    
+    FeedForwardLayer<?, ?> decodingLayer = new FeedForwardLayerMock(new Neurons(100, true), 
+        new Neurons3D(28, 28 ,1, false));
 
     return new AutoEncoderMock(encodingLayer, decodingLayer);
   }
