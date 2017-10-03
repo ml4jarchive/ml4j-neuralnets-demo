@@ -18,6 +18,7 @@ import org.ml4j.Matrix;
 import org.ml4j.MatrixFactory;
 import org.ml4j.imaging.targets.ImageDisplay;
 import org.ml4j.mocks.MatrixFactoryMock;
+import org.ml4j.nn.activationfunctions.mocks.DifferentiableActivationFunctionMock;
 import org.ml4j.nn.demo.base.unsupervised.UnsupervisedNeuralNetworkDemoBase;
 import org.ml4j.nn.demo.util.MnistUtils;
 import org.ml4j.nn.demo.util.PixelFeaturesMatrixCsvDataExtractor;
@@ -59,10 +60,11 @@ public class AutoEncoderDemo
     // Construct a 2 layer AutoEncoderMock
 
     FeedForwardLayer<?, ?> encodingLayer = new FeedForwardLayerMock(
-        new Neurons3D(28, 28 ,1, false), new Neurons(100, false));
+        new Neurons3D(28, 28 ,1, false), new Neurons(100, false), 
+        new DifferentiableActivationFunctionMock());
     
     FeedForwardLayer<?, ?> decodingLayer = new FeedForwardLayerMock(new Neurons(100, true), 
-        new Neurons3D(28, 28 ,1, false));
+        new Neurons3D(28, 28 ,1, false), new DifferentiableActivationFunctionMock());
 
     return new AutoEncoderMock(encodingLayer, decodingLayer);
   }
