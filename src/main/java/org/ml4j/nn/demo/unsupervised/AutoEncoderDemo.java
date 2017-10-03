@@ -120,7 +120,8 @@ public class AutoEncoderDemo
   protected AutoEncoderContext createTrainingContext(AutoEncoder unsupervisedNeuralNetwork,
       MatrixFactory matrixFactory) {
     LOGGER.trace("Creating AutoEncoderContextMock");
-    return new AutoEncoderContextMock(matrixFactory);
+    // Train from layer index 0 to the end layer
+    return new AutoEncoderContextMock(matrixFactory, 0, null);
   }
 
   @Override
@@ -131,9 +132,12 @@ public class AutoEncoderDemo
     // Create display for our demo
     ImageDisplay<Long> display = new ImageDisplay<Long>(280, 280);
     
-    AutoEncoderContext autoEncoderContext =  new AutoEncoderContextMock(matrixFactory);
+    // Create a context for the first layer only
+    AutoEncoderContext autoEncoderNeuronVisualisationContext =  
+        new AutoEncoderContextMock(matrixFactory, 0, 0);
     
-    DirectedLayerContext hiddenNeuronInspectionContext = autoEncoderContext.createLayerContext(0);
+    DirectedLayerContext hiddenNeuronInspectionContext = 
+        autoEncoderNeuronVisualisationContext.createLayerContext(0);
     
     LOGGER.info("Drawing visualisations of patterns sought by the hidden neurons...");
     for (int j = 0; j < autoEncoder.getFirstLayer().getOutputNeuronCount(); j++) {
@@ -165,7 +169,8 @@ public class AutoEncoderDemo
 
       MnistUtils.draw(orignalActivation.getActivations().toArray(), display);
 
-      AutoEncoderContext encodingContext = new AutoEncoderContextMock(matrixFactory);
+      // Encode only through the first layer
+      AutoEncoderContext encodingContext = new AutoEncoderContextMock(matrixFactory, 0, 0);
 
       NeuronsActivation encodedFeatures = autoEncoder.encode(orignalActivation, encodingContext);
 
@@ -174,7 +179,8 @@ public class AutoEncoderDemo
       
       Thread.sleep(1000);
 
-      AutoEncoderContext decodingContext = new AutoEncoderContextMock(matrixFactory);
+      // Decode only through the seconds layer
+      AutoEncoderContext decodingContext = new AutoEncoderContextMock(matrixFactory, 1, 1);
 
       // Now reconstruct the features again
       NeuronsActivation reconstructedFeatures =
