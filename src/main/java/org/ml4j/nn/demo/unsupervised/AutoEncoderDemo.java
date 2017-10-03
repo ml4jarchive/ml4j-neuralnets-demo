@@ -22,6 +22,7 @@ import org.ml4j.mocks.MatrixFactoryMock;
 import org.ml4j.nn.demo.base.unsupervised.UnsupervisedNeuralNetworkDemoBase;
 import org.ml4j.nn.demo.util.MnistUtils;
 import org.ml4j.nn.demo.util.PixelFeaturesMatrixCsvDataExtractor;
+import org.ml4j.nn.layers.DirectedLayerContext;
 import org.ml4j.nn.layers.FeedForwardLayer;
 import org.ml4j.nn.neurons.NeuronsActivation;
 import org.ml4j.nn.neurons.NeuronsActivationFeatureOrientation;
@@ -107,10 +108,32 @@ public class AutoEncoderDemo
       NeuronsActivation testDataInputActivations, MatrixFactory matrixFactory) throws Exception {
     LOGGER.info("Showcasing trained AutoEncoder...");
 
-    // Create displays for our original and reconstructed image
+    // Create display for our demo
     ImageDisplay<Long> display = new ImageDisplay<Long>(280, 280);
-    // Visualise the reconstructions of the input data
     
+    AutoEncoderContext autoEncoderContext =  new AutoEncoderContextMock(matrixFactory);
+    
+    DirectedLayerContext hiddenNeuronInspectionContext = autoEncoderContext.createLayerContext(0);
+    
+    LOGGER.info("Drawing visualisations of patterns sought by the hidden neurons...");
+    for (int j = 0; j < autoEncoder.getFirstLayer().getOutputNeuronCount(); j++) {
+      NeuronsActivation neuronActivationMaximisingActivation = autoEncoder.getFirstLayer()
+          .getOptimalInputForOutputNeuron(j, hiddenNeuronInspectionContext);
+      double[] neuronActivationMaximisingFeatures =
+          neuronActivationMaximisingActivation.getActivations().toArray();
+
+      double[] intensities = new double[neuronActivationMaximisingFeatures.length];
+      for (int i = 0; i < intensities.length; i++) {
+        double val = neuronActivationMaximisingFeatures[i];
+        double boundary = 0.02;
+        intensities[i] = val < -boundary ? 0 : val > boundary ? 1 : 0.5;
+      }
+      MnistUtils.draw(intensities, display);
+      Thread.sleep(100);
+    }
+    
+    // Visualise the reconstructions of the input data
+  
     LOGGER.info("Visualising reconstructed data");
     for (int i = 0; i < 100; i++) {
 
