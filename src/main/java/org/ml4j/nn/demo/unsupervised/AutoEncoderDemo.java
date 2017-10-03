@@ -18,7 +18,7 @@ import org.ml4j.Matrix;
 import org.ml4j.MatrixFactory;
 import org.ml4j.imaging.targets.ImageDisplay;
 import org.ml4j.mocks.MatrixFactoryMock;
-import org.ml4j.nn.activationfunctions.mocks.DifferentiableActivationFunctionMock;
+import org.ml4j.nn.activationfunctions.mocks.SigmoidActivationFunctionMock;
 import org.ml4j.nn.demo.base.unsupervised.UnsupervisedNeuralNetworkDemoBase;
 import org.ml4j.nn.demo.util.MnistUtils;
 import org.ml4j.nn.demo.util.PixelFeaturesMatrixCsvDataExtractor;
@@ -58,13 +58,26 @@ public class AutoEncoderDemo
       boolean isBiasUnitIncluded) {
 
     // Construct a 2 layer AutoEncoderMock
+    
+    // Initialise the connection weights to zeros for this demo while we are using
+    // mocks - this will be modified later so we initialise the weights correctly
+    // As part of the "training" of the mock AutoEncoder, we re-initialise the weights
+    // to pre-learned values, so this initial configuration isn't used in the demo
+    
+    // Also, for now, don't include bias units in the layer configurations until the
+    // logic to handle appending of bias units is implemented
+ 
+    Matrix layer1MockConnectionWeights = createMatrixFactory().createZeros(featureCount, 100);
+    
+    Matrix layer2MockConnectionWeights = createMatrixFactory().createZeros(100 , featureCount);
 
     FeedForwardLayer<?, ?> encodingLayer = new FeedForwardLayerMock(
         new Neurons3D(28, 28 ,1, false), new Neurons(100, false), 
-        new DifferentiableActivationFunctionMock());
+        new SigmoidActivationFunctionMock(), layer1MockConnectionWeights);
     
-    FeedForwardLayer<?, ?> decodingLayer = new FeedForwardLayerMock(new Neurons(100, true), 
-        new Neurons3D(28, 28 ,1, false), new DifferentiableActivationFunctionMock());
+    FeedForwardLayer<?, ?> decodingLayer = new FeedForwardLayerMock(new Neurons(100, false), 
+        new Neurons3D(28, 28 ,1, false), new SigmoidActivationFunctionMock(), 
+        layer2MockConnectionWeights);
 
     return new AutoEncoderMock(encodingLayer, decodingLayer);
   }
