@@ -75,7 +75,7 @@ public class AutoEncoderDemo
         new Neurons3D(28, 28 ,1, false), new Neurons(100, false), 
         new SigmoidActivationFunctionMock(), layer1MockConnectionWeights);
     
-    FeedForwardLayer<?, ?> decodingLayer = new FeedForwardLayerMock(new Neurons(100, false), 
+    FeedForwardLayer<?, ?> decodingLayer = new FeedForwardLayerMock(new Neurons(100, true), 
         new Neurons3D(28, 28 ,1, false), new SigmoidActivationFunctionMock(), 
         layer2MockConnectionWeights);
 
