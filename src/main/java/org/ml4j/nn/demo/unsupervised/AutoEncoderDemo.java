@@ -63,13 +63,10 @@ public class AutoEncoderDemo
     // mocks - this will be modified later so we initialise the weights correctly
     // As part of the "training" of the mock AutoEncoder, we re-initialise the weights
     // to pre-learned values, so this initial configuration isn't used in the demo
-    
-    // Also, for now, don't include bias units in the layer configurations until the
-    // logic to handle appending of bias units is implemented
- 
+
     Matrix layer1MockConnectionWeights = createMatrixFactory().createZeros(featureCount, 100);
-    
-    Matrix layer2MockConnectionWeights = createMatrixFactory().createZeros(100 , featureCount);
+     
+    Matrix layer2MockConnectionWeights = createMatrixFactory().createZeros(101 , featureCount);
 
     FeedForwardLayer<?, ?> encodingLayer = new FeedForwardLayerMock(
         new Neurons3D(28, 28 ,1, false), new Neurons(100, false), 
