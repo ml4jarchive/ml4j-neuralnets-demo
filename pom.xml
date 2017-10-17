@@ -12,8 +12,11 @@
 	</distributionManagement>
 	<repositories>
 		<repository>
-			<id>opensourceagility-snapshot</id>
-			<url>https://repository-opensourceagility.forge.cloudbees.com/snapshot/</url>
+			<id>ml4j-snapshots</id>
+			<url>https://raw.githubusercontent.com/ml4j/mvn-repository/master/snapshots</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
 		</repository>
 	</repositories>
 	<dependencies>
