@@ -16,23 +16,23 @@ package org.ml4j.nn.demo.unsupervised;
 
 import org.ml4j.Matrix;
 import org.ml4j.MatrixFactory;
+import org.ml4j.MatrixFactoryImpl;
 import org.ml4j.imaging.targets.ImageDisplay;
-import org.ml4j.mocks.MatrixFactoryMock;
-import org.ml4j.nn.activationfunctions.mocks.SigmoidActivationFunctionMock;
+import org.ml4j.nn.activationfunctions.SigmoidActivationFunction;
 import org.ml4j.nn.demo.base.unsupervised.UnsupervisedNeuralNetworkDemoBase;
 import org.ml4j.nn.demo.util.MnistUtils;
 import org.ml4j.nn.demo.util.PixelFeaturesMatrixCsvDataExtractor;
 import org.ml4j.nn.layers.DirectedLayerContext;
 import org.ml4j.nn.layers.FeedForwardLayer;
-import org.ml4j.nn.layers.mocks.FeedForwardLayerMock;
+import org.ml4j.nn.layers.FeedForwardLayerImpl;
 import org.ml4j.nn.neurons.Neurons;
 import org.ml4j.nn.neurons.Neurons3D;
 import org.ml4j.nn.neurons.NeuronsActivation;
 import org.ml4j.nn.neurons.NeuronsActivationFeatureOrientation;
 import org.ml4j.nn.unsupervised.AutoEncoder;
 import org.ml4j.nn.unsupervised.AutoEncoderContext;
-import org.ml4j.nn.unsupervised.mocks.AutoEncoderContextMock;
-import org.ml4j.nn.unsupervised.mocks.AutoEncoderMock;
+import org.ml4j.nn.unsupervised.AutoEncoderContextImpl;
+import org.ml4j.nn.unsupervised.AutoEncoderImpl;
 import org.ml4j.util.DoubleArrayMatrixLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,26 +57,16 @@ public class AutoEncoderDemo
   protected AutoEncoder createUnsupervisedNeuralNetwork(int featureCount,
       boolean isBiasUnitIncluded) {
 
-    // Construct a 2 layer AutoEncoderMock
+    // Construct a 2 layer AutoEncoder
     
-    // Initialise the connection weights to zeros for this demo while we are using
-    // mocks - this will be modified later so we initialise the weights correctly
-    // As part of the "training" of the mock AutoEncoder, we re-initialise the weights
-    // to pre-learned values, so this initial configuration isn't used in the demo
-
-    Matrix layer1MockConnectionWeights = createMatrixFactory().createZeros(featureCount, 100);
-     
-    Matrix layer2MockConnectionWeights = createMatrixFactory().createZeros(101 , featureCount);
-
-    FeedForwardLayer<?, ?> encodingLayer = new FeedForwardLayerMock(
+    FeedForwardLayer<?, ?> encodingLayer = new FeedForwardLayerImpl(
         new Neurons3D(28, 28 ,1, false), new Neurons(100, false), 
-        new SigmoidActivationFunctionMock(), layer1MockConnectionWeights);
+        new SigmoidActivationFunction());
     
-    FeedForwardLayer<?, ?> decodingLayer = new FeedForwardLayerMock(new Neurons(100, true), 
-        new Neurons3D(28, 28 ,1, false), new SigmoidActivationFunctionMock(), 
-        layer2MockConnectionWeights);
+    FeedForwardLayer<?, ?> decodingLayer = new FeedForwardLayerImpl(new Neurons(100, true), 
+        new Neurons3D(28, 28 ,1, false), new SigmoidActivationFunction());
 
-    return new AutoEncoderMock(encodingLayer, decodingLayer);
+    return new AutoEncoderImpl(encodingLayer, decodingLayer);
   }
 
   @Override
@@ -109,16 +99,16 @@ public class AutoEncoderDemo
 
   @Override
   protected MatrixFactory createMatrixFactory() {
-    LOGGER.trace("Creating MatrixFactoryMock");
-    return new MatrixFactoryMock();
+    LOGGER.trace("Creating MatrixFactory");
+    return new MatrixFactoryImpl();
   }
 
   @Override
   protected AutoEncoderContext createTrainingContext(AutoEncoder unsupervisedNeuralNetwork,
       MatrixFactory matrixFactory) {
-    LOGGER.trace("Creating AutoEncoderContextMock");
+    LOGGER.trace("Creating AutoEncoderContext");
     // Train from layer index 0 to the end layer
-    return new AutoEncoderContextMock(matrixFactory, 0, null);
+    return new AutoEncoderContextImpl(matrixFactory, 0, null);
   }
 
   @Override
@@ -131,7 +121,7 @@ public class AutoEncoderDemo
     
     // Create a context for the first layer only
     AutoEncoderContext autoEncoderNeuronVisualisationContext =  
-        new AutoEncoderContextMock(matrixFactory, 0, 0);
+        new AutoEncoderContextImpl(matrixFactory, 0, 0);
     
     DirectedLayerContext hiddenNeuronInspectionContext = 
         autoEncoderNeuronVisualisationContext.createLayerContext(0);
@@ -167,7 +157,7 @@ public class AutoEncoderDemo
       MnistUtils.draw(orignalActivation.getActivations().toArray(), display);
 
       // Encode only through the first layer
-      AutoEncoderContext encodingContext = new AutoEncoderContextMock(matrixFactory, 0, 0);
+      AutoEncoderContext encodingContext = new AutoEncoderContextImpl(matrixFactory, 0, 0);
 
       NeuronsActivation encodedFeatures = autoEncoder.encode(orignalActivation, encodingContext);
 
@@ -177,7 +167,7 @@ public class AutoEncoderDemo
       Thread.sleep(1000);
 
       // Decode only through the seconds layer
-      AutoEncoderContext decodingContext = new AutoEncoderContextMock(matrixFactory, 1, 1);
+      AutoEncoderContext decodingContext = new AutoEncoderContextImpl(matrixFactory, 1, 1);
 
       // Now reconstruct the features again
       NeuronsActivation reconstructedFeatures =
