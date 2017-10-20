@@ -60,7 +60,7 @@ public class AutoEncoderDemo
     // Construct a 2 layer AutoEncoder
     
     FeedForwardLayer<?, ?> encodingLayer = new FeedForwardLayerImpl(
-        new Neurons3D(28, 28 ,1, false), new Neurons(100, false), 
+        new Neurons3D(28, 28 ,1, true), new Neurons(100, false), 
         new SigmoidActivationFunction());
     
     FeedForwardLayer<?, ?> decodingLayer = new FeedForwardLayerImpl(new Neurons(100, true), 
@@ -108,7 +108,10 @@ public class AutoEncoderDemo
       MatrixFactory matrixFactory) {
     LOGGER.trace("Creating AutoEncoderContext");
     // Train from layer index 0 to the end layer
-    return new AutoEncoderContextImpl(matrixFactory, 0, null);
+    AutoEncoderContext context = new AutoEncoderContextImpl(matrixFactory, 0, null);
+    context.setTrainingIterations(200);
+    context.setTrainingLearningRate(0.0002);
+    return context;
   }
 
   @Override
