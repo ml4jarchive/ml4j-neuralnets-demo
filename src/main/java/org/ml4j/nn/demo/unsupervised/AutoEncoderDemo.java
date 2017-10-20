@@ -16,8 +16,8 @@ package org.ml4j.nn.demo.unsupervised;
 
 import org.ml4j.Matrix;
 import org.ml4j.MatrixFactory;
-import org.ml4j.MatrixFactoryImpl;
 import org.ml4j.imaging.targets.ImageDisplay;
+import org.ml4j.jblas.JBlasMatrixFactory;
 import org.ml4j.nn.activationfunctions.SigmoidActivationFunction;
 import org.ml4j.nn.demo.base.unsupervised.UnsupervisedNeuralNetworkDemoBase;
 import org.ml4j.nn.demo.util.MnistUtils;
@@ -100,7 +100,7 @@ public class AutoEncoderDemo
   @Override
   protected MatrixFactory createMatrixFactory() {
     LOGGER.trace("Creating MatrixFactory");
-    return new MatrixFactoryImpl();
+    return new JBlasMatrixFactory();
   }
 
   @Override
