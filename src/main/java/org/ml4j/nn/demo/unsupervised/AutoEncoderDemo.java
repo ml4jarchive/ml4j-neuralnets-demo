@@ -59,12 +59,14 @@ public class AutoEncoderDemo
 
     // Construct a 2 layer AutoEncoder
     
+    MatrixFactory matrixFactory = createMatrixFactory();
+    
     FeedForwardLayer<?, ?> encodingLayer = new FeedForwardLayerImpl(
         new Neurons3D(28, 28 ,1, true), new Neurons(100, false), 
-        new SigmoidActivationFunction());
+        new SigmoidActivationFunction(), matrixFactory);
     
     FeedForwardLayer<?, ?> decodingLayer = new FeedForwardLayerImpl(new Neurons(100, true), 
-        new Neurons3D(28, 28 ,1, false), new SigmoidActivationFunction());
+        new Neurons3D(28, 28 ,1, false), new SigmoidActivationFunction(), matrixFactory);
 
     return new AutoEncoderImpl(encodingLayer, decodingLayer);
   }
