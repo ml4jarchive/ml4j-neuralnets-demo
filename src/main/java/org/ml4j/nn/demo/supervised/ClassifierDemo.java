@@ -12,7 +12,7 @@
  * the License.
  */
 
-package org.ml4j.nn.demo.unsupervised;
+package org.ml4j.nn.demo.supervised;
 
 import org.ml4j.Matrix;
 import org.ml4j.MatrixFactory;
