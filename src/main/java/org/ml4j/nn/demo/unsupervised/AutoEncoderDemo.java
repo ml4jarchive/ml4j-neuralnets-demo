@@ -62,10 +62,10 @@ public class AutoEncoderDemo
     MatrixFactory matrixFactory = createMatrixFactory();
     
     FeedForwardLayer<?, ?> encodingLayer = new FeedForwardLayerImpl(
-        new Neurons3D(28, 28 ,1, true), new Neurons(100, false), 
+        new Neurons3D(28, 28 ,1, true), new Neurons(200, false), 
         new SigmoidActivationFunction(), matrixFactory);
     
-    FeedForwardLayer<?, ?> decodingLayer = new FeedForwardLayerImpl(new Neurons(100, true), 
+    FeedForwardLayer<?, ?> decodingLayer = new FeedForwardLayerImpl(new Neurons(200, true), 
         new Neurons3D(28, 28 ,1, false), new SigmoidActivationFunction(), matrixFactory);
 
     return new AutoEncoderImpl(encodingLayer, decodingLayer);
@@ -79,7 +79,7 @@ public class AutoEncoderDemo
             AutoEncoderDemo.class.getClassLoader());
     // Load Mnist data into double[][] matrices
     double[][] trainingDataMatrix = loader.loadDoubleMatrixFromCsv("mnist2500_X_custom.csv",
-            new PixelFeaturesMatrixCsvDataExtractor(), 0, 1000);
+            new PixelFeaturesMatrixCsvDataExtractor(), 0, 500);
     
     return new NeuronsActivation(matrixFactory.createMatrix(trainingDataMatrix), false,
         NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
@@ -111,8 +111,8 @@ public class AutoEncoderDemo
     LOGGER.trace("Creating AutoEncoderContext");
     // Train from layer index 0 to the end layer
     AutoEncoderContext context = new AutoEncoderContextImpl(matrixFactory, 0, null);
-    context.setTrainingIterations(200);
-    context.setTrainingLearningRate(0.0002);
+    context.setTrainingIterations(400);
+    context.setTrainingLearningRate(0.1);
     return context;
   }
 
