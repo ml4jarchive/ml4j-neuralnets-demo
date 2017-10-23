@@ -22,7 +22,7 @@ import org.ml4j.nn.FeedForwardNeuralNetworkContext;
 import org.ml4j.nn.ForwardPropagation;
 import org.ml4j.nn.activationfunctions.SigmoidActivationFunction;
 import org.ml4j.nn.activationfunctions.SoftmaxActivationFunction;
-import org.ml4j.nn.demo.base.unsupervised.SupervisedNeuralNetworkDemoBase;
+import org.ml4j.nn.demo.base.supervised.SupervisedNeuralNetworkDemoBase;
 import org.ml4j.nn.demo.util.MnistUtils;
 import org.ml4j.nn.demo.util.PixelFeaturesMatrixCsvDataExtractor;
 import org.ml4j.nn.demo.util.SingleDigitLabelsMatrixCsvDataExtractor;
@@ -118,14 +118,45 @@ public class ClassifierDemo
     FeedForwardNeuralNetworkContext context =
         new FeedForwardNeuralNetworkContextImpl(matrixFactory, 0, null);
     context.setTrainingIterations(200);
-    context.setTrainingLearningRate(0.001);
+    context.setTrainingLearningRate(0.05);
     return context;
+  }
+  
+  @Override
+  protected void showcaseTrainedNeuralNetworkOnTrainingSet(
+      SupervisedFeedForwardNeuralNetwork neuralNetwork,
+      NeuronsActivation testDataInputActivations, NeuronsActivation testDataLabelActivations, 
+      MatrixFactory matrixFactory) throws Exception {
+    
+    // Create a context for the entire network
+    FeedForwardNeuralNetworkContext accuracyContext =  
+        new FeedForwardNeuralNetworkContextImpl(matrixFactory, 0, null);
+   
+    double classificationAccuracy = 
+        neuralNetwork.getClassificationAccuracy(testDataInputActivations, 
+            testDataLabelActivations, accuracyContext);
+    
+    LOGGER.info("Classification training set accuracy:" + classificationAccuracy);
+    
   }
 
   @Override
-  protected void showcaseTrainedNeuralNetwork(SupervisedFeedForwardNeuralNetwork neuralNetwork,
-      NeuronsActivation testDataInputActivations, MatrixFactory matrixFactory) throws Exception {
-    LOGGER.info("Showcasing trained AutoEncoder...");
+  protected void showcaseTrainedNeuralNetworkOnTestSet(
+      SupervisedFeedForwardNeuralNetwork neuralNetwork,
+      NeuronsActivation testDataInputActivations, NeuronsActivation testDataLabelActivations, 
+      MatrixFactory matrixFactory) throws Exception {
+
+    // Create a context for the entire network
+    FeedForwardNeuralNetworkContext accuracyContext =  
+        new FeedForwardNeuralNetworkContextImpl(matrixFactory, 0, null);
+   
+    double classificationAccuracy = 
+        neuralNetwork.getClassificationAccuracy(testDataInputActivations, 
+            testDataLabelActivations, accuracyContext);
+    
+    LOGGER.info("Classification test set accuracy:" + classificationAccuracy);
+
+    LOGGER.info("Showcasing trained Classifier...");
 
     // Create display for our demo
     ImageDisplay<Long> display = new ImageDisplay<Long>(280, 280);
@@ -208,7 +239,13 @@ public class ClassifierDemo
 
   @Override
   protected NeuronsActivation createTestSetLabelNeuronActivations(MatrixFactory matrixFactory) {
-    // TODO Auto-generated method stub
-    return null;
+    DoubleArrayMatrixLoader loader = new DoubleArrayMatrixLoader(
+        ClassifierDemo.class.getClassLoader());
+    // Load Mnist data into double[][] matrices
+    double[][] testDataMatrix = loader.loadDoubleMatrixFromCsv("mnist2500_labels_custom.csv",
+        new SingleDigitLabelsMatrixCsvDataExtractor(), 1000, 2000);
+   
+    return new NeuronsActivation(matrixFactory.createMatrix(testDataMatrix), false,
+        NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
   }
 }

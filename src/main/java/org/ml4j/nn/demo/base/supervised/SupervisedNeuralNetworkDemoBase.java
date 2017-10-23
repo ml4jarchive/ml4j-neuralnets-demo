@@ -12,7 +12,7 @@
  * the License.
  */
 
-package org.ml4j.nn.demo.base.unsupervised;
+package org.ml4j.nn.demo.base.supervised;
 
 import org.ml4j.MatrixFactory;
 import org.ml4j.nn.NeuralNetworkContext;
@@ -20,12 +20,12 @@ import org.ml4j.nn.neurons.NeuronsActivation;
 import org.ml4j.nn.supervised.SupervisedNeuralNetwork;
 
 /**
- * Base class for test harness to train and showcase an UnsupervisedNeuralNetwork.
+ * Base class for test harness to train and showcase a SupervisedNeuralNetwork.
  * 
  * @author Michael Lavelle
  *
- * @param <N> The type of UnsupervisedNeuralNetwork we are showcasing
- * @param <C> The type of runtime NeuralNetworkContext for this UnsupervisedNeuralNetwork
+ * @param <N> The type of SupervisedNeuralNetwork we are showcasing
+ * @param <C> The type of runtime NeuralNetworkContext for this SupervisedNeuralNetwork
  */
 public abstract class SupervisedNeuralNetworkDemoBase<N 
     extends SupervisedNeuralNetwork<?, C, ?>, C extends NeuralNetworkContext> {
@@ -45,7 +45,6 @@ public abstract class SupervisedNeuralNetworkDemoBase<N
     NeuronsActivation trainingDataInputActivations =
         createTrainingDataNeuronActivations(matrixFactory);
     
-
     // Create the training labels NeuronActivations
     NeuronsActivation trainingLabelOutputActivations =
         createTrainingLabelNeuronActivations(matrixFactory);
@@ -55,21 +54,29 @@ public abstract class SupervisedNeuralNetworkDemoBase<N
     boolean isBiasUnitIncluded = trainingDataInputActivations.isBiasUnitIncluded();
 
     // Create the neural network for this feature count and bias
-    N unsupervisedNeuralNetwork =
+    N supervisedNeuralNetwork =
         createSupervisedNeuralNetwork(inputFeatureCount, isBiasUnitIncluded);
 
     // Create the training context
-    C trainingContext = createTrainingContext(unsupervisedNeuralNetwork, matrixFactory);
+    C trainingContext = createTrainingContext(supervisedNeuralNetwork, matrixFactory);
     
     // Train the network
-    unsupervisedNeuralNetwork.train(trainingDataInputActivations, 
+    supervisedNeuralNetwork.train(trainingDataInputActivations, 
         trainingLabelOutputActivations, trainingContext);
+   
+    // Showcase the network on the test set
+    showcaseTrainedNeuralNetworkOnTrainingSet(supervisedNeuralNetwork, 
+        trainingDataInputActivations, trainingLabelOutputActivations, matrixFactory);
 
     // Create the test set
     NeuronsActivation testSetInputActivations = createTestSetDataNeuronActivations(matrixFactory);
     
+    // Create the test set
+    NeuronsActivation testSetLabelActivations = createTestSetLabelNeuronActivations(matrixFactory);
+  
     // Showcase the network on the test set
-    showcaseTrainedNeuralNetwork(unsupervisedNeuralNetwork, testSetInputActivations, matrixFactory);
+    showcaseTrainedNeuralNetworkOnTestSet(supervisedNeuralNetwork, 
+        testSetInputActivations, testSetLabelActivations, matrixFactory);
   }
 
  
@@ -118,10 +125,10 @@ public abstract class SupervisedNeuralNetworkDemoBase<N
       MatrixFactory matrixFactory);
 
   /**
-   * Constructs the UnsupervisedNeuralNetwork we are demonstrating, given the input data's
+   * Constructs the SupervisedNeuralNetwork we are demonstrating, given the input data's
    * featureCount.
    * 
-   * @param featureCount The number of features in the input data this UnsupervisedNeuralNetwork
+   * @param featureCount The number of features in the input data this SupervisedNeuralNetwork
    *        supports
    * @param isBiasUnitIncluded Whether the count of features of the input data includes a bias unit.
    * @return the UnsupervisedNeuralNetwork we are demonstrating
@@ -130,23 +137,38 @@ public abstract class SupervisedNeuralNetworkDemoBase<N
       boolean isBiasUnitIncluded);
 
   /**
-   * Creates the NeuralNetworkContext we use in order to train the UnsupervisedNeuralNetwork.
+   * Creates the NeuralNetworkContext we use in order to train the SupervisedNeuralNetwork.
    * 
-   * @param unsupervisedNeuralNetwork The UnsupervisedNeuralNetwork we are training
+   * @param supervisedNeuralNetwork The SupervisedNeuralNetwork we are training
    * @param matrixFactory The MatrixFactory we are using for this demo
-   * @return the NeuralNetworkContext we use in order to train the UnsupervisedNeuralNetwork
+   * @return the NeuralNetworkContext we use in order to train the SupervisedNeuralNetwork
    */
-  protected abstract C createTrainingContext(N unsupervisedNeuralNetwork,
+  protected abstract C createTrainingContext(N supervisedNeuralNetwork,
       MatrixFactory matrixFactory);
 
   /**
-   * Method to be implemented by subclasses to showcase the UnsupervisedNeuralNetwork.
+   * Method to be implemented by subclasses to showcase the SupervisedNeuralNetwork.
    * 
-   * @param unsupervisedNeuralNetwork The UnsupervisedNeuralNetwork we are showcasing
+   * @param supervisedNeuralNetwork The UnsupervisedNeuralNetwork we are showcasing
    * @param testDataInputActivations The input NeuronsActivation instance generated by the test data
+   * @param testSetLabelActivations The labels NeuronsActivation instance generted by the test set
    * @param matrixFactory The MatrixFactory we are using for this demo
    * @throws Exception In the event of an exception
    */
-  protected abstract void showcaseTrainedNeuralNetwork(N unsupervisedNeuralNetwork,
-      NeuronsActivation testDataInputActivations, MatrixFactory matrixFactory) throws Exception;
+  protected abstract void showcaseTrainedNeuralNetworkOnTestSet(N supervisedNeuralNetwork,
+      NeuronsActivation testDataInputActivations, NeuronsActivation testSetLabelActivations, 
+      MatrixFactory matrixFactory) throws Exception;
+  
+  /**
+   * Method to be implemented by subclasses to showcase the SupervisedNeuralNetwork.
+   * 
+   * @param supervisedNeuralNetwork The UnsupervisedNeuralNetwork we are showcasing
+   * @param testDataInputActivations The input NeuronsActivation instance generated by the test data
+   * @param testSetLabelActivations The labels NeuronsActivation instance generted by the test set
+   * @param matrixFactory The MatrixFactory we are using for this demo
+   * @throws Exception In the event of an exception
+   */
+  protected abstract void showcaseTrainedNeuralNetworkOnTrainingSet(N supervisedNeuralNetwork,
+      NeuronsActivation testDataInputActivations, NeuronsActivation testSetLabelActivations, 
+      MatrixFactory matrixFactory) throws Exception;
 }
