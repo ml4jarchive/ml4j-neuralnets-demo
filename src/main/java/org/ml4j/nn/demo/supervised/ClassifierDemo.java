@@ -41,10 +41,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A simple test harness to train and showcase an AutoEncoder.
+ * A simple test harness to train and showcase a Classifier.
  * 
  * @author Michael Lavelle
- *
  */
 public class ClassifierDemo
     extends SupervisedNeuralNetworkDemoBase<SupervisedFeedForwardNeuralNetwork, 
