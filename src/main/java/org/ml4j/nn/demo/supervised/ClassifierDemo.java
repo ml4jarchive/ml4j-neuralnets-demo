@@ -28,7 +28,7 @@ import org.ml4j.nn.demo.util.PixelFeaturesMatrixCsvDataExtractor;
 import org.ml4j.nn.demo.util.SingleDigitLabelsMatrixCsvDataExtractor;
 import org.ml4j.nn.layers.DirectedLayerContext;
 import org.ml4j.nn.layers.FeedForwardLayer;
-import org.ml4j.nn.layers.FeedForwardLayerImpl;
+import org.ml4j.nn.layers.FullyConnectedFeedForwardLayerImpl;
 import org.ml4j.nn.neurons.Neurons;
 import org.ml4j.nn.neurons.Neurons3D;
 import org.ml4j.nn.neurons.NeuronsActivation;
@@ -65,11 +65,12 @@ public class ClassifierDemo
     
     MatrixFactory matrixFactory = createMatrixFactory();
     
-    FeedForwardLayer<?, ?> firstLayer = new FeedForwardLayerImpl(
+    FeedForwardLayer<?, ?> firstLayer = new FullyConnectedFeedForwardLayerImpl(
         new Neurons3D(28, 28 ,1, true), new Neurons(100, false), 
         new SigmoidActivationFunction(), matrixFactory);
     
-    FeedForwardLayer<?, ?> secondLayer = new FeedForwardLayerImpl(new Neurons(100, true), 
+    FeedForwardLayer<?, ?> secondLayer = 
+        new FullyConnectedFeedForwardLayerImpl(new Neurons(100, true), 
         new Neurons(10, false), new SoftmaxActivationFunction(), matrixFactory);
 
     return new SupervisedFeedForwardNeuralNetworkImpl(firstLayer, secondLayer);

@@ -24,7 +24,7 @@ import org.ml4j.nn.demo.util.MnistUtils;
 import org.ml4j.nn.demo.util.PixelFeaturesMatrixCsvDataExtractor;
 import org.ml4j.nn.layers.DirectedLayerContext;
 import org.ml4j.nn.layers.FeedForwardLayer;
-import org.ml4j.nn.layers.FeedForwardLayerImpl;
+import org.ml4j.nn.layers.FullyConnectedFeedForwardLayerImpl;
 import org.ml4j.nn.neurons.Neurons;
 import org.ml4j.nn.neurons.Neurons3D;
 import org.ml4j.nn.neurons.NeuronsActivation;
@@ -61,11 +61,12 @@ public class AutoEncoderDemo
     
     MatrixFactory matrixFactory = createMatrixFactory();
     
-    FeedForwardLayer<?, ?> encodingLayer = new FeedForwardLayerImpl(
+    FeedForwardLayer<?, ?> encodingLayer = new FullyConnectedFeedForwardLayerImpl(
         new Neurons3D(28, 28 ,1, true), new Neurons(200, false), 
         new SigmoidActivationFunction(), matrixFactory);
     
-    FeedForwardLayer<?, ?> decodingLayer = new FeedForwardLayerImpl(new Neurons(200, true), 
+    FeedForwardLayer<?, ?> decodingLayer = 
+        new FullyConnectedFeedForwardLayerImpl(new Neurons(200, true), 
         new Neurons3D(28, 28 ,1, false), new SigmoidActivationFunction(), matrixFactory);
 
     return new AutoEncoderImpl(encodingLayer, decodingLayer);
