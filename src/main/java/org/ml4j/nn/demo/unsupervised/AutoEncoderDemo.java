@@ -16,15 +16,15 @@ package org.ml4j.nn.demo.unsupervised;
 
 import org.ml4j.Matrix;
 import org.ml4j.MatrixFactory;
-import org.ml4j.MatrixFactoryImpl;
 import org.ml4j.imaging.targets.ImageDisplay;
+import org.ml4j.jblas.JBlasMatrixFactory;
 import org.ml4j.nn.activationfunctions.SigmoidActivationFunction;
 import org.ml4j.nn.demo.base.unsupervised.UnsupervisedNeuralNetworkDemoBase;
 import org.ml4j.nn.demo.util.MnistUtils;
 import org.ml4j.nn.demo.util.PixelFeaturesMatrixCsvDataExtractor;
 import org.ml4j.nn.layers.DirectedLayerContext;
 import org.ml4j.nn.layers.FeedForwardLayer;
-import org.ml4j.nn.layers.FeedForwardLayerImpl;
+import org.ml4j.nn.layers.FullyConnectedFeedForwardLayerImpl;
 import org.ml4j.nn.neurons.Neurons;
 import org.ml4j.nn.neurons.Neurons3D;
 import org.ml4j.nn.neurons.NeuronsActivation;
@@ -59,12 +59,15 @@ public class AutoEncoderDemo
 
     // Construct a 2 layer AutoEncoder
     
-    FeedForwardLayer<?, ?> encodingLayer = new FeedForwardLayerImpl(
-        new Neurons3D(28, 28 ,1, false), new Neurons(100, false), 
-        new SigmoidActivationFunction());
+    MatrixFactory matrixFactory = createMatrixFactory();
     
-    FeedForwardLayer<?, ?> decodingLayer = new FeedForwardLayerImpl(new Neurons(100, true), 
-        new Neurons3D(28, 28 ,1, false), new SigmoidActivationFunction());
+    FeedForwardLayer<?, ?> encodingLayer = new FullyConnectedFeedForwardLayerImpl(
+        new Neurons3D(28, 28 ,1, true), new Neurons(200, false), 
+        new SigmoidActivationFunction(), matrixFactory);
+    
+    FeedForwardLayer<?, ?> decodingLayer = 
+        new FullyConnectedFeedForwardLayerImpl(new Neurons(200, true), 
+        new Neurons3D(28, 28 ,1, false), new SigmoidActivationFunction(), matrixFactory);
 
     return new AutoEncoderImpl(encodingLayer, decodingLayer);
   }
@@ -77,7 +80,7 @@ public class AutoEncoderDemo
             AutoEncoderDemo.class.getClassLoader());
     // Load Mnist data into double[][] matrices
     double[][] trainingDataMatrix = loader.loadDoubleMatrixFromCsv("mnist2500_X_custom.csv",
-            new PixelFeaturesMatrixCsvDataExtractor(), 0, 1000);
+            new PixelFeaturesMatrixCsvDataExtractor(), 0, 500);
     
     return new NeuronsActivation(matrixFactory.createMatrix(trainingDataMatrix), false,
         NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
@@ -100,7 +103,7 @@ public class AutoEncoderDemo
   @Override
   protected MatrixFactory createMatrixFactory() {
     LOGGER.trace("Creating MatrixFactory");
-    return new MatrixFactoryImpl();
+    return new JBlasMatrixFactory();
   }
 
   @Override
@@ -108,7 +111,10 @@ public class AutoEncoderDemo
       MatrixFactory matrixFactory) {
     LOGGER.trace("Creating AutoEncoderContext");
     // Train from layer index 0 to the end layer
-    return new AutoEncoderContextImpl(matrixFactory, 0, null);
+    AutoEncoderContext context = new AutoEncoderContextImpl(matrixFactory, 0, null);
+    context.setTrainingIterations(400);
+    context.setTrainingLearningRate(0.1);
+    return context;
   }
 
   @Override

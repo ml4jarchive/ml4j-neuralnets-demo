@@ -55,7 +55,7 @@ public abstract class UnsupervisedNeuralNetworkDemoBase<N
 
     // Create the training context
     C trainingContext = createTrainingContext(unsupervisedNeuralNetwork, matrixFactory);
-
+    
     // Train the network
     unsupervisedNeuralNetwork.train(trainingDataInputActivations, trainingContext);
 
