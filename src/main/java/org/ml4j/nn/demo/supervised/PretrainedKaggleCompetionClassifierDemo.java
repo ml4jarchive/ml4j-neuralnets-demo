@@ -100,7 +100,7 @@ public class PretrainedKaggleCompetionClassifierDemo
             new Neurons3D(10, 10, 6, false), matrixFactory, true);
    
     FeedForwardLayer<?, ?> thirdLayer = 
-        new ConvolutionalFeedForwardLayerImpl(new Neurons3D(10, 10, 6, true), 
+        new FullyConnectedFeedForwardLayerImpl(new Neurons3D(10, 10, 6, true), 
             new Neurons3D(5, 5, 16, false), new SigmoidActivationFunction(), 
             matrixFactory, layer3Weights);
     
@@ -223,7 +223,7 @@ public class PretrainedKaggleCompetionClassifierDemo
         intensities[i] = val < -boundary ? 0 : val > boundary ? 1 : 0.5;
       }
       KaggleMnistUtils.draw(intensities, display);
-      Thread.sleep(20);
+      Thread.sleep(5);
     }
     
     // Visualise the reconstructions of the input data
