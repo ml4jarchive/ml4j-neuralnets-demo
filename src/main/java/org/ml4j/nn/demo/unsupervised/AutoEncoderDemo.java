@@ -130,7 +130,7 @@ public class AutoEncoderDemo
         new AutoEncoderContextImpl(matrixFactory, 0, 0);
     
     DirectedLayerContext hiddenNeuronInspectionContext = 
-        autoEncoderNeuronVisualisationContext.createLayerContext(0);
+        autoEncoderNeuronVisualisationContext.getLayerContext(0);
     
     LOGGER.info("Drawing visualisations of patterns sought by the hidden neurons...");
     for (int j = 0; j < autoEncoder.getFirstLayer().getOutputNeuronCount(); j++) {
