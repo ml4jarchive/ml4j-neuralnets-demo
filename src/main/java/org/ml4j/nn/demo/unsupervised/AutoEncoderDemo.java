@@ -112,7 +112,7 @@ public class AutoEncoderDemo
     LOGGER.trace("Creating AutoEncoderContext");
     // Train from layer index 0 to the end layer
     AutoEncoderContext context = new AutoEncoderContextImpl(matrixFactory, 0, null);
-    context.setTrainingIterations(400);
+    context.setTrainingEpochs(400);
     context.setTrainingLearningRate(0.1);
     return context;
   }

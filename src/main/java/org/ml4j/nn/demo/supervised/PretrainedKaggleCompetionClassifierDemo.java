@@ -159,7 +159,7 @@ public class PretrainedKaggleCompetionClassifierDemo
     // Train from layer index 0 to the end layer
     FeedForwardNeuralNetworkContext context =
         new FeedForwardNeuralNetworkContextImpl(matrixFactory, 0, null);
-    context.setTrainingIterations(0);
+    context.setTrainingEpochs(0);
     return context;
   }
   

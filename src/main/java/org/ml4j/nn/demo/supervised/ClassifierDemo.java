@@ -117,7 +117,7 @@ public class ClassifierDemo
     // Train from layer index 0 to the end layer
     FeedForwardNeuralNetworkContext context =
         new FeedForwardNeuralNetworkContextImpl(matrixFactory, 0, null);
-    context.setTrainingIterations(200);
+    context.setTrainingEpochs(200);
     context.setTrainingLearningRate(0.05);
     return context;
   }
