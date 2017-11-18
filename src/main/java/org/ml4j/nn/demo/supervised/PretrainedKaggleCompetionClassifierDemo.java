@@ -89,7 +89,7 @@ public class PretrainedKaggleCompetionClassifierDemo
     
     FeedForwardLayer<?, ?> firstLayer = new ConvolutionalFeedForwardLayerImpl(
         new Neurons3D(28, 28 ,1, true), new Neurons3D(20, 20, 6, false), 
-        new SigmoidActivationFunction(), matrixFactory, layer1Weights);
+        new SigmoidActivationFunction(), matrixFactory, layer1Weights, false);
             
     // The max pooling layer that this NN was trained with originally was a legacy
     // implementation which scaled up the output activations by a factor of
@@ -97,22 +97,22 @@ public class PretrainedKaggleCompetionClassifierDemo
     // legacy situation.  Normally we would set this property to false
     FeedForwardLayer<?, ?> secondLayer = 
         new MaxPoolingFeedForwardLayerImpl(new Neurons3D(20, 20, 6, false), 
-            new Neurons3D(10, 10, 6, false), matrixFactory, true);
+            new Neurons3D(10, 10, 6, false), matrixFactory, true, false);
    
     FeedForwardLayer<?, ?> thirdLayer = 
         new FullyConnectedFeedForwardLayerImpl(new Neurons3D(10, 10, 6, true), 
             new Neurons3D(5, 5, 16, false), new SigmoidActivationFunction(), 
-            matrixFactory, layer3Weights);
+            matrixFactory, layer3Weights, false);
     
     FeedForwardLayer<?, ?> forthLayer = 
         new FullyConnectedFeedForwardLayerImpl(new Neurons(400, true), 
         new Neurons(100, false), new SigmoidActivationFunction(), matrixFactory,
-        layer4Weights);
+        layer4Weights, false);
     
     FeedForwardLayer<?, ?> fifthLayer = 
         new FullyConnectedFeedForwardLayerImpl(new Neurons(100, true), 
         new Neurons(10, false), new SoftmaxActivationFunction(), matrixFactory,
-        layer5Weights);
+        layer5Weights, false);
 
     return new SupervisedFeedForwardNeuralNetworkImpl(firstLayer, secondLayer,
         thirdLayer, forthLayer, fifthLayer);

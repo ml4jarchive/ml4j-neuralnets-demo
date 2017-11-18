@@ -67,11 +67,11 @@ public class ClassifierDemo
     
     FeedForwardLayer<?, ?> firstLayer = new FullyConnectedFeedForwardLayerImpl(
         new Neurons3D(28, 28 ,1, true), new Neurons(100, false), 
-        new SigmoidActivationFunction(), matrixFactory);
+        new SigmoidActivationFunction(), matrixFactory, false);
     
     FeedForwardLayer<?, ?> secondLayer = 
         new FullyConnectedFeedForwardLayerImpl(new Neurons(100, true), 
-        new Neurons(10, false), new SoftmaxActivationFunction(), matrixFactory);
+        new Neurons(10, false), new SoftmaxActivationFunction(), matrixFactory, false);
 
     return new SupervisedFeedForwardNeuralNetworkImpl(firstLayer, secondLayer);
   }

@@ -63,11 +63,11 @@ public class AutoEncoderDemo
     
     FeedForwardLayer<?, ?> encodingLayer = new FullyConnectedFeedForwardLayerImpl(
         new Neurons3D(28, 28 ,1, true), new Neurons(200, false), 
-        new SigmoidActivationFunction(), matrixFactory);
+        new SigmoidActivationFunction(), matrixFactory, false);
     
     FeedForwardLayer<?, ?> decodingLayer = 
         new FullyConnectedFeedForwardLayerImpl(new Neurons(200, true), 
-        new Neurons3D(28, 28 ,1, false), new SigmoidActivationFunction(), matrixFactory);
+        new Neurons3D(28, 28 ,1, false), new SigmoidActivationFunction(), matrixFactory, false);
 
     return new AutoEncoderImpl(encodingLayer, decodingLayer);
   }
