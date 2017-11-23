@@ -67,11 +67,11 @@ public class ClassifierDemo
     
     FeedForwardLayer<?, ?> firstLayer = new FullyConnectedFeedForwardLayerImpl(
         new Neurons3D(28, 28 ,1, true), new Neurons(100, false), 
-        new SigmoidActivationFunction(), matrixFactory);
+        new SigmoidActivationFunction(), matrixFactory, false);
     
     FeedForwardLayer<?, ?> secondLayer = 
         new FullyConnectedFeedForwardLayerImpl(new Neurons(100, true), 
-        new Neurons(10, false), new SoftmaxActivationFunction(), matrixFactory);
+        new Neurons(10, false), new SoftmaxActivationFunction(), matrixFactory, false);
 
     return new SupervisedFeedForwardNeuralNetworkImpl(firstLayer, secondLayer);
   }
@@ -117,7 +117,7 @@ public class ClassifierDemo
     // Train from layer index 0 to the end layer
     FeedForwardNeuralNetworkContext context =
         new FeedForwardNeuralNetworkContextImpl(matrixFactory, 0, null);
-    context.setTrainingIterations(200);
+    context.setTrainingEpochs(200);
     context.setTrainingLearningRate(0.05);
     return context;
   }
