@@ -63,8 +63,7 @@ public class PretrainedKaggleCompetionClassifierDemo
 
   @Override
   protected SupervisedFeedForwardNeuralNetwork 
-      createSupervisedNeuralNetwork(int featureCount,
-      boolean isBiasUnitIncluded) {
+      createSupervisedNeuralNetwork(int featureCount) {
 
     // Construct a 5 layer Neural Network
     
@@ -128,7 +127,7 @@ public class PretrainedKaggleCompetionClassifierDemo
     double[][] trainingDataMatrix = loader.loadDoubleMatrixFromCsv("train.csv",
             new KagglePixelFeaturesMatrixCsvDataExtractor(), 1, 1001);
     
-    return new NeuronsActivation(matrixFactory.createMatrix(trainingDataMatrix), false,
+    return new NeuronsActivation(matrixFactory.createMatrix(trainingDataMatrix),
         NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
   }
 
@@ -142,7 +141,7 @@ public class PretrainedKaggleCompetionClassifierDemo
     double[][] testDataMatrix = loader.loadDoubleMatrixFromCsv("train.csv",
         new KagglePixelFeaturesMatrixCsvDataExtractor(), 1001, 2001);
 
-    return new NeuronsActivation(matrixFactory.createMatrix(testDataMatrix), false,
+    return new NeuronsActivation(matrixFactory.createMatrix(testDataMatrix),
         NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
   }
 
@@ -234,7 +233,7 @@ public class PretrainedKaggleCompetionClassifierDemo
       // For each element in our test set, obtain the compressed encoded features
       Matrix activations = testDataInputActivations.getActivations().getRow(i);
       
-      NeuronsActivation orignalActivation = new NeuronsActivation(activations, false,
+      NeuronsActivation orignalActivation = new NeuronsActivation(activations,
           NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
 
       KaggleMnistUtils.draw(orignalActivation.getActivations().toArray(), display);
@@ -274,7 +273,7 @@ public class PretrainedKaggleCompetionClassifierDemo
     double[][] testDataMatrix = loader.loadDoubleMatrixFromCsv("train.csv",
         new SingleDigitLabelsMatrixCsvDataExtractor(), 1, 1001);
    
-    return new NeuronsActivation(matrixFactory.createMatrix(testDataMatrix), false,
+    return new NeuronsActivation(matrixFactory.createMatrix(testDataMatrix),
         NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
   }
 
@@ -286,7 +285,7 @@ public class PretrainedKaggleCompetionClassifierDemo
     double[][] testDataMatrix = loader.loadDoubleMatrixFromCsv("train.csv",
         new SingleDigitLabelsMatrixCsvDataExtractor(), 1001, 2001);
    
-    return new NeuronsActivation(matrixFactory.createMatrix(testDataMatrix), false,
+    return new NeuronsActivation(matrixFactory.createMatrix(testDataMatrix),
         NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
   }
 }
