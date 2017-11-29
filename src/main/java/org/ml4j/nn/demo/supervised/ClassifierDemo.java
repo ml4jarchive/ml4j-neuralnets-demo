@@ -58,19 +58,18 @@ public class ClassifierDemo
 
   @Override
   protected SupervisedFeedForwardNeuralNetwork 
-      createSupervisedNeuralNetwork(int featureCount,
-      boolean isBiasUnitIncluded) {
+      createSupervisedNeuralNetwork(int featureCount) {
 
     // Construct a 2 layer Neural Network
     
     MatrixFactory matrixFactory = createMatrixFactory();
     
     FeedForwardLayer<?, ?> firstLayer = new FullyConnectedFeedForwardLayerImpl(
-        new Neurons3D(28, 28 ,1, true), new Neurons(100, false), 
+        new Neurons3D(28, 28 ,1, true), new Neurons3D(20, 20, 1, false), 
         new SigmoidActivationFunction(), matrixFactory, false);
     
     FeedForwardLayer<?, ?> secondLayer = 
-        new FullyConnectedFeedForwardLayerImpl(new Neurons(100, true), 
+        new FullyConnectedFeedForwardLayerImpl(new Neurons3D(20, 20, 1, true), 
         new Neurons(10, false), new SoftmaxActivationFunction(), matrixFactory, false);
 
     return new SupervisedFeedForwardNeuralNetworkImpl(firstLayer, secondLayer);
@@ -86,7 +85,7 @@ public class ClassifierDemo
     double[][] trainingDataMatrix = loader.loadDoubleMatrixFromCsv("mnist2500_X_custom.csv",
             new PixelFeaturesMatrixCsvDataExtractor(), 0, 1000);
     
-    return new NeuronsActivation(matrixFactory.createMatrix(trainingDataMatrix), false,
+    return new NeuronsActivation(matrixFactory.createMatrix(trainingDataMatrix),
         NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
   }
 
@@ -100,7 +99,7 @@ public class ClassifierDemo
     double[][] testDataMatrix = loader.loadDoubleMatrixFromCsv("mnist2500_X_custom.csv",
         new PixelFeaturesMatrixCsvDataExtractor(), 1000, 2000);
 
-    return new NeuronsActivation(matrixFactory.createMatrix(testDataMatrix), false,
+    return new NeuronsActivation(matrixFactory.createMatrix(testDataMatrix),
         NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
   }
 
@@ -119,6 +118,7 @@ public class ClassifierDemo
         new FeedForwardNeuralNetworkContextImpl(matrixFactory, 0, null);
     context.setTrainingEpochs(200);
     context.setTrainingLearningRate(0.05);
+    context.getLayerContext(0).setInputDropoutKeepProbability(0.8);
     return context;
   }
   
@@ -193,7 +193,7 @@ public class ClassifierDemo
       // For each element in our test set, obtain the compressed encoded features
       Matrix activations = testDataInputActivations.getActivations().getRow(i);
       
-      NeuronsActivation orignalActivation = new NeuronsActivation(activations, false,
+      NeuronsActivation orignalActivation = new NeuronsActivation(activations,
           NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
 
       MnistUtils.draw(orignalActivation.getActivations().toArray(), display);
@@ -233,7 +233,7 @@ public class ClassifierDemo
     double[][] testDataMatrix = loader.loadDoubleMatrixFromCsv("mnist2500_labels_custom.csv",
         new SingleDigitLabelsMatrixCsvDataExtractor(), 0, 1000);
    
-    return new NeuronsActivation(matrixFactory.createMatrix(testDataMatrix), false,
+    return new NeuronsActivation(matrixFactory.createMatrix(testDataMatrix),
         NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
   }
 
@@ -245,7 +245,7 @@ public class ClassifierDemo
     double[][] testDataMatrix = loader.loadDoubleMatrixFromCsv("mnist2500_labels_custom.csv",
         new SingleDigitLabelsMatrixCsvDataExtractor(), 1000, 2000);
    
-    return new NeuronsActivation(matrixFactory.createMatrix(testDataMatrix), false,
+    return new NeuronsActivation(matrixFactory.createMatrix(testDataMatrix),
         NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
   }
 }
