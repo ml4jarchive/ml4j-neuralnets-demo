@@ -63,8 +63,7 @@ public class PretrainedKaggleCompetionClassifierDemo
 
   @Override
   protected SupervisedFeedForwardNeuralNetwork 
-      createSupervisedNeuralNetwork(int featureCount,
-      boolean isBiasUnitIncluded) {
+      createSupervisedNeuralNetwork(int featureCount) {
 
     // Construct a 5 layer Neural Network
     
@@ -89,7 +88,7 @@ public class PretrainedKaggleCompetionClassifierDemo
     
     FeedForwardLayer<?, ?> firstLayer = new ConvolutionalFeedForwardLayerImpl(
         new Neurons3D(28, 28 ,1, true), new Neurons3D(20, 20, 6, false), 
-        new SigmoidActivationFunction(), matrixFactory, layer1Weights);
+        new SigmoidActivationFunction(), matrixFactory, layer1Weights, false);
             
     // The max pooling layer that this NN was trained with originally was a legacy
     // implementation which scaled up the output activations by a factor of
@@ -97,22 +96,22 @@ public class PretrainedKaggleCompetionClassifierDemo
     // legacy situation.  Normally we would set this property to false
     FeedForwardLayer<?, ?> secondLayer = 
         new MaxPoolingFeedForwardLayerImpl(new Neurons3D(20, 20, 6, false), 
-            new Neurons3D(10, 10, 6, false), matrixFactory, true);
+            new Neurons3D(10, 10, 6, false), matrixFactory, true, false);
    
     FeedForwardLayer<?, ?> thirdLayer = 
         new FullyConnectedFeedForwardLayerImpl(new Neurons3D(10, 10, 6, true), 
             new Neurons3D(5, 5, 16, false), new SigmoidActivationFunction(), 
-            matrixFactory, layer3Weights);
+            matrixFactory, layer3Weights, false);
     
     FeedForwardLayer<?, ?> forthLayer = 
         new FullyConnectedFeedForwardLayerImpl(new Neurons(400, true), 
         new Neurons(100, false), new SigmoidActivationFunction(), matrixFactory,
-        layer4Weights);
+        layer4Weights, false);
     
     FeedForwardLayer<?, ?> fifthLayer = 
         new FullyConnectedFeedForwardLayerImpl(new Neurons(100, true), 
         new Neurons(10, false), new SoftmaxActivationFunction(), matrixFactory,
-        layer5Weights);
+        layer5Weights, false);
 
     return new SupervisedFeedForwardNeuralNetworkImpl(firstLayer, secondLayer,
         thirdLayer, forthLayer, fifthLayer);
@@ -128,7 +127,7 @@ public class PretrainedKaggleCompetionClassifierDemo
     double[][] trainingDataMatrix = loader.loadDoubleMatrixFromCsv("train.csv",
             new KagglePixelFeaturesMatrixCsvDataExtractor(), 1, 1001);
     
-    return new NeuronsActivation(matrixFactory.createMatrix(trainingDataMatrix), false,
+    return new NeuronsActivation(matrixFactory.createMatrix(trainingDataMatrix),
         NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
   }
 
@@ -142,7 +141,7 @@ public class PretrainedKaggleCompetionClassifierDemo
     double[][] testDataMatrix = loader.loadDoubleMatrixFromCsv("train.csv",
         new KagglePixelFeaturesMatrixCsvDataExtractor(), 1001, 2001);
 
-    return new NeuronsActivation(matrixFactory.createMatrix(testDataMatrix), false,
+    return new NeuronsActivation(matrixFactory.createMatrix(testDataMatrix),
         NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
   }
 
@@ -159,7 +158,7 @@ public class PretrainedKaggleCompetionClassifierDemo
     // Train from layer index 0 to the end layer
     FeedForwardNeuralNetworkContext context =
         new FeedForwardNeuralNetworkContextImpl(matrixFactory, 0, null);
-    context.setTrainingIterations(0);
+    context.setTrainingEpochs(0);
     return context;
   }
   
@@ -234,7 +233,7 @@ public class PretrainedKaggleCompetionClassifierDemo
       // For each element in our test set, obtain the compressed encoded features
       Matrix activations = testDataInputActivations.getActivations().getRow(i);
       
-      NeuronsActivation orignalActivation = new NeuronsActivation(activations, false,
+      NeuronsActivation orignalActivation = new NeuronsActivation(activations,
           NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
 
       KaggleMnistUtils.draw(orignalActivation.getActivations().toArray(), display);
@@ -274,7 +273,7 @@ public class PretrainedKaggleCompetionClassifierDemo
     double[][] testDataMatrix = loader.loadDoubleMatrixFromCsv("train.csv",
         new SingleDigitLabelsMatrixCsvDataExtractor(), 1, 1001);
    
-    return new NeuronsActivation(matrixFactory.createMatrix(testDataMatrix), false,
+    return new NeuronsActivation(matrixFactory.createMatrix(testDataMatrix),
         NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
   }
 
@@ -286,7 +285,7 @@ public class PretrainedKaggleCompetionClassifierDemo
     double[][] testDataMatrix = loader.loadDoubleMatrixFromCsv("train.csv",
         new SingleDigitLabelsMatrixCsvDataExtractor(), 1001, 2001);
    
-    return new NeuronsActivation(matrixFactory.createMatrix(testDataMatrix), false,
+    return new NeuronsActivation(matrixFactory.createMatrix(testDataMatrix),
         NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
   }
 }

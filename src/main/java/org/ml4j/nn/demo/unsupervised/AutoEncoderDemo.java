@@ -54,8 +54,7 @@ public class AutoEncoderDemo
   }
 
   @Override
-  protected AutoEncoder createUnsupervisedNeuralNetwork(int featureCount,
-      boolean isBiasUnitIncluded) {
+  protected AutoEncoder createUnsupervisedNeuralNetwork(int featureCount) {
 
     // Construct a 2 layer AutoEncoder
     
@@ -63,11 +62,11 @@ public class AutoEncoderDemo
     
     FeedForwardLayer<?, ?> encodingLayer = new FullyConnectedFeedForwardLayerImpl(
         new Neurons3D(28, 28 ,1, true), new Neurons(200, false), 
-        new SigmoidActivationFunction(), matrixFactory);
+        new SigmoidActivationFunction(), matrixFactory, false);
     
     FeedForwardLayer<?, ?> decodingLayer = 
         new FullyConnectedFeedForwardLayerImpl(new Neurons(200, true), 
-        new Neurons3D(28, 28 ,1, false), new SigmoidActivationFunction(), matrixFactory);
+        new Neurons3D(28, 28 ,1, false), new SigmoidActivationFunction(), matrixFactory, false);
 
     return new AutoEncoderImpl(encodingLayer, decodingLayer);
   }
@@ -82,7 +81,7 @@ public class AutoEncoderDemo
     double[][] trainingDataMatrix = loader.loadDoubleMatrixFromCsv("mnist2500_X_custom.csv",
             new PixelFeaturesMatrixCsvDataExtractor(), 0, 500);
     
-    return new NeuronsActivation(matrixFactory.createMatrix(trainingDataMatrix), false,
+    return new NeuronsActivation(matrixFactory.createMatrix(trainingDataMatrix),
         NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
   }
 
@@ -96,7 +95,7 @@ public class AutoEncoderDemo
     double[][] testDataMatrix = loader.loadDoubleMatrixFromCsv("mnist2500_X_custom.csv",
         new PixelFeaturesMatrixCsvDataExtractor(), 1000, 2000);
 
-    return new NeuronsActivation(matrixFactory.createMatrix(testDataMatrix), false,
+    return new NeuronsActivation(matrixFactory.createMatrix(testDataMatrix),
         NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
   }
 
@@ -112,7 +111,7 @@ public class AutoEncoderDemo
     LOGGER.trace("Creating AutoEncoderContext");
     // Train from layer index 0 to the end layer
     AutoEncoderContext context = new AutoEncoderContextImpl(matrixFactory, 0, null);
-    context.setTrainingIterations(400);
+    context.setTrainingEpochs(400);
     context.setTrainingLearningRate(0.1);
     return context;
   }
@@ -157,7 +156,7 @@ public class AutoEncoderDemo
       // For each element in our test set, obtain the compressed encoded features
       Matrix activations = testDataInputActivations.getActivations().getRow(i);
       
-      NeuronsActivation orignalActivation = new NeuronsActivation(activations, false,
+      NeuronsActivation orignalActivation = new NeuronsActivation(activations,
           NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
 
       MnistUtils.draw(orignalActivation.getActivations().toArray(), display);
@@ -167,8 +166,8 @@ public class AutoEncoderDemo
 
       NeuronsActivation encodedFeatures = autoEncoder.encode(orignalActivation, encodingContext);
 
-      LOGGER.info("Encoded a single image from " + orignalActivation.getFeatureCountExcludingBias() 
-          + " pixels to " + encodedFeatures.getFeatureCountExcludingBias() + " features");
+      LOGGER.info("Encoded a single image from " + orignalActivation.getFeatureCount() 
+          + " pixels to " + encodedFeatures.getFeatureCount() + " features");
       
       Thread.sleep(1000);
 
@@ -181,8 +180,8 @@ public class AutoEncoderDemo
       
       // Display the reconstructed input image
       MnistUtils.draw(reconstructedFeatures.getActivations().toArray(), display);
-      LOGGER.info("Decoded " + encodedFeatures.getFeatureCountExcludingBias() 
-          + " features into an image with "  + reconstructedFeatures.getFeatureCountExcludingBias() 
+      LOGGER.info("Decoded " + encodedFeatures.getFeatureCount() 
+          + " features into an image with "  + reconstructedFeatures.getFeatureCount() 
           + " pixels");
 
       Thread.sleep(1000);

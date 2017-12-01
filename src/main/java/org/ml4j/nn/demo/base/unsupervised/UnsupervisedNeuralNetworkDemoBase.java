@@ -47,11 +47,10 @@ public abstract class UnsupervisedNeuralNetworkDemoBase<N
 
     // Determine the feature counts and bias inclusion of the training data
     int inputFeatureCount = trainingDataInputActivations.getActivations().getColumns();
-    boolean isBiasUnitIncluded = trainingDataInputActivations.isBiasUnitIncluded();
 
     // Create the neural network for this feature count and bias
     N unsupervisedNeuralNetwork =
-        createUnsupervisedNeuralNetwork(inputFeatureCount, isBiasUnitIncluded);
+        createUnsupervisedNeuralNetwork(inputFeatureCount);
 
     // Create the training context
     C trainingContext = createTrainingContext(unsupervisedNeuralNetwork, matrixFactory);
@@ -97,11 +96,9 @@ public abstract class UnsupervisedNeuralNetworkDemoBase<N
    * 
    * @param featureCount The number of features in the input data this UnsupervisedNeuralNetwork
    *        supports
-   * @param isBiasUnitIncluded Whether the count of features of the input data includes a bias unit.
    * @return the UnsupervisedNeuralNetwork we are demonstrating
    */
-  protected abstract N createUnsupervisedNeuralNetwork(int featureCount,
-      boolean isBiasUnitIncluded);
+  protected abstract N createUnsupervisedNeuralNetwork(int featureCount);
 
   /**
    * Creates the NeuralNetworkContext we use in order to train the UnsupervisedNeuralNetwork.

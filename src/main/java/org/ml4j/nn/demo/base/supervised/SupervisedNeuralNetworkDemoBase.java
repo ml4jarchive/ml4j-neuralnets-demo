@@ -51,11 +51,10 @@ public abstract class SupervisedNeuralNetworkDemoBase<N
 
     // Determine the feature counts and bias inclusion of the training data
     int inputFeatureCount = trainingDataInputActivations.getActivations().getColumns();
-    boolean isBiasUnitIncluded = trainingDataInputActivations.isBiasUnitIncluded();
 
     // Create the neural network for this feature count and bias
     N supervisedNeuralNetwork =
-        createSupervisedNeuralNetwork(inputFeatureCount, isBiasUnitIncluded);
+        createSupervisedNeuralNetwork(inputFeatureCount);
 
     // Create the training context
     C trainingContext = createTrainingContext(supervisedNeuralNetwork, matrixFactory);
@@ -130,11 +129,9 @@ public abstract class SupervisedNeuralNetworkDemoBase<N
    * 
    * @param featureCount The number of features in the input data this SupervisedNeuralNetwork
    *        supports
-   * @param isBiasUnitIncluded Whether the count of features of the input data includes a bias unit.
    * @return the UnsupervisedNeuralNetwork we are demonstrating
    */
-  protected abstract N createSupervisedNeuralNetwork(int featureCount,
-      boolean isBiasUnitIncluded);
+  protected abstract N createSupervisedNeuralNetwork(int featureCount);
 
   /**
    * Creates the NeuralNetworkContext we use in order to train the SupervisedNeuralNetwork.
