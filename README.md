@@ -38,7 +38,6 @@
     // Create NeuronsActivation instances for the inputs and desired outputs.
     NeuronsActivation trainingDataActivations = new NeuronsActivation(matrixFactory.createMatrix(trainingData), NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET); 
 
-    
     NeuronsActivation desiredOutputActivations = new NeuronsActivation(matrixFactory.createMatrix(trainingLabels), NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET); 
     
     // Create a context to train the network from Layer 0 to the final Layer.
@@ -51,5 +50,24 @@
     
     // Train the NeuralNetwork
     neuralNetwork.train(trainingDataActivations, desiredOutputActivations, context);
+
+```
+
+## Using the NeuralNetwork
+
+```
+
+    // Use the NeuralNetwork, to obtain output activations for test set data activations.
+    
+    double[][] testSetData = ...  ; // Our test set data - one row per training example.
+
+    // Create NeuronsActivation instance from this test set data.
+    NeuronsActivation testSetDataActivations = new NeuronsActivation(matrixFactory.createMatrix(trainingData), NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET); 
+    
+    // Obtain the output NeuronsActivation by forward propagating the input activations through the Network
+    NeuronsActivation outputActivations = 
+          neuralNetwork.forwardPropagate(testSetDataActivations, context).getOutputs();
+    
+    // Use the output activations (eg. to classify, by taking the argmax of each row)
 
 ```
