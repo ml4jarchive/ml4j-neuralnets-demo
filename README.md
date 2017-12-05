@@ -44,10 +44,12 @@
     FeedForwardNeuralNetworkContext context = 
         new FeedForwardNeuralNetworkContextImpl(matrixFactory, 0, null);
     
-    // Configure the context to train in mini-batches of 32 and to run for 100 Epochs.
+    // Configure the context to train in mini-batches of 32 and to run for 100 Epochs
+    // and specify the learning rate
     context.setTrainingMiniBatchSize(32);
     context.setTrainingEpochs(100);
-    
+    context.setTrainingLearningRate(0.05);
+
     // Train the NeuralNetwork
     neuralNetwork.train(trainingDataActivations, desiredOutputActivations, context);
 
