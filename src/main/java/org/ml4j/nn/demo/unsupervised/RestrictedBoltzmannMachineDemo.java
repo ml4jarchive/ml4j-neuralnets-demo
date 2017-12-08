@@ -14,14 +14,20 @@
 
 package org.ml4j.nn.demo.unsupervised;
 
+import org.ml4j.Matrix;
 import org.ml4j.MatrixFactory;
+import org.ml4j.imaging.targets.ImageDisplay;
 import org.ml4j.jblas.JBlasMatrixFactory;
 import org.ml4j.nn.activationfunctions.SigmoidActivationFunction;
 import org.ml4j.nn.axons.FullyConnectedAxons;
 import org.ml4j.nn.demo.base.unsupervised.UnsupervisedNeuralNetworkDemoBase;
+import org.ml4j.nn.demo.util.MnistUtils;
 import org.ml4j.nn.demo.util.PixelFeaturesMatrixCsvDataExtractor;
 import org.ml4j.nn.layers.RestrictedBoltzmannLayer;
 import org.ml4j.nn.layers.RestrictedBoltzmannLayerImpl;
+import org.ml4j.nn.layers.UndirectedLayerContext;
+import org.ml4j.nn.layers.UndirectedLayerContextImpl;
+import org.ml4j.nn.neurons.Neurons;
 import org.ml4j.nn.neurons.Neurons3D;
 import org.ml4j.nn.neurons.NeuronsActivation;
 import org.ml4j.nn.neurons.NeuronsActivationFeatureOrientation;
@@ -42,6 +48,8 @@ import org.slf4j.LoggerFactory;
 public class RestrictedBoltzmannMachineDemo
     extends UnsupervisedNeuralNetworkDemoBase<RestrictedBoltzmannMachine, 
     RestrictedBoltzmannMachineContext> {
+  
+  private double learningRate = 0.01;
 
   private static final Logger LOGGER = 
         LoggerFactory.getLogger(RestrictedBoltzmannMachineDemo.class);
@@ -58,10 +66,18 @@ public class RestrictedBoltzmannMachineDemo
     
     MatrixFactory matrixFactory = createMatrixFactory();
     
+    NeuronsActivation trainingDataActivations = createTrainingDataNeuronActivations(matrixFactory);
+    
+    Matrix initialConnectionWeights = 
+        RestrictedBoltzmannLayerImpl
+        .generateInitialConnectionWeights(trainingDataActivations, 
+            new Neurons3D(28, 28 ,1, true), new Neurons(100, true), learningRate, matrixFactory);
+        
     RestrictedBoltzmannLayer<FullyConnectedAxons> restrictedBoltmannLayer 
         = new RestrictedBoltzmannLayerImpl(
-        new Neurons3D(28, 28 ,1, true), new Neurons3D(28, 28 ,1, true), 
-        new SigmoidActivationFunction(), new SigmoidActivationFunction(), matrixFactory);
+        new Neurons3D(28, 28 ,1, true), new Neurons(100, true), 
+        new SigmoidActivationFunction(), new SigmoidActivationFunction(), matrixFactory, 
+        initialConnectionWeights);
     
     return new RestrictedBoltzmannMachineImpl(restrictedBoltmannLayer);
   }
@@ -107,6 +123,9 @@ public class RestrictedBoltzmannMachineDemo
     LOGGER.trace("Creating RestrictedBoltzmannMachineContext");
     RestrictedBoltzmannMachineContext context = 
         new RestrictedBoltzmannMachineContextImpl(matrixFactory);
+    context.setTrainingEpochs(200);
+    context.setTrainingLearningRate(learningRate);
+    context.setTrainingMiniBatchSize(32);
     return context;
   }
 
@@ -114,5 +133,29 @@ public class RestrictedBoltzmannMachineDemo
   protected void showcaseTrainedNeuralNetwork(RestrictedBoltzmannMachine restrictedBoltzmannMachine,
       NeuronsActivation testDataInputActivations, MatrixFactory matrixFactory) throws Exception {
     LOGGER.info("Showcasing trained RestrictedBoltzmannMachine...");
+    
+    // Create display for our demo
+    ImageDisplay<Long> display = new ImageDisplay<Long>(280, 280);
+    
+    LOGGER.info("Drawing visualisations of patterns sought by the hidden neurons...");
+    for (int j = 0; j < restrictedBoltzmannMachine.getFirstLayer()
+        .getHiddenNeurons().getNeuronCountExcludingBias(); j++) {
+      UndirectedLayerContext hiddenNeuronInspectionContext =
+          new UndirectedLayerContextImpl(0, matrixFactory);
+      NeuronsActivation neuronActivationMaximisingActivation =
+          restrictedBoltzmannMachine.getFirstLayer().getOptimalVisibleActivationsForHiddenNeuron(j,
+              hiddenNeuronInspectionContext);
+      double[] neuronActivationMaximisingFeatures =
+          neuronActivationMaximisingActivation.getActivations().toArray();
+
+      double[] intensities = new double[neuronActivationMaximisingFeatures.length];
+      for (int i = 0; i < intensities.length; i++) {
+        double val = neuronActivationMaximisingFeatures[i];
+        double boundary = 0.02;
+        intensities[i] = val < -boundary ? 0 : val > boundary ? 1 : 0.5;
+      }
+      MnistUtils.draw(intensities, display);
+      Thread.sleep(100);
+    }
   }
 }
