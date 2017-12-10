@@ -27,7 +27,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.ml4j</groupId>
-			<artifactId>ml4j-matrices-impl</artifactId>
+			<artifactId>ml4j-legacy-matrices-impl</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
