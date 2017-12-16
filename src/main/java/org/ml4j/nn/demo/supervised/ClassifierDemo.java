@@ -118,7 +118,7 @@ public class ClassifierDemo
         new FeedForwardNeuralNetworkContextImpl(matrixFactory, 0, null);
     context.setTrainingEpochs(200);
     context.setTrainingLearningRate(0.05);
-    context.getLayerContext(0).getSynapsesContext(0).getAxonsContext(0)
+    context.getLayerContext(0).getSynapsesContext(0).getAxonsContext(0, 0)
     .setLeftHandInputDropoutKeepProbability(0.8);
     return context;
   }
