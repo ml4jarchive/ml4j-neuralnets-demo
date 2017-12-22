@@ -12,6 +12,13 @@
 	</distributionManagement>
 	<repositories>
 		<repository>
+			<id>ml4j-releases</id>
+			<url>https://raw.githubusercontent.com/ml4j/mvn-repository/master/releases</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+		<repository>
 			<id>ml4j-snapshots</id>
 			<url>https://raw.githubusercontent.com/ml4j/mvn-repository/master/snapshots</url>
 			<snapshots>
@@ -23,7 +30,7 @@
 		<dependency>
 			<groupId>org.ml4j</groupId>
 			<artifactId>ml4j-nn-api</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
+			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.ml4j</groupId>
