@@ -65,26 +65,26 @@ public class ClassifierDemo extends
 
     MatrixFactory matrixFactory = createMatrixFactory();
 
-    FullyConnectedFeedForwardLayer firstLayer =
-        new FullyConnectedFeedForwardLayerImpl(new Neurons3D(28, 28, 1, false),
+    FullyConnectedFeedForwardLayer firstLayerOfResidualBlock =
+        new FullyConnectedFeedForwardLayerImpl(new Neurons3D(28, 28, 1, true),
             new Neurons3D(20, 20, 1, false), new SigmoidActivationFunction(), matrixFactory, false);
 
-    FullyConnectedFeedForwardLayer firstLayer2 =
-        new FullyConnectedFeedForwardLayerImpl(new Neurons3D(20, 20, 1, false),
+    FullyConnectedFeedForwardLayer secondLayerOfResidualBlock =
+        new FullyConnectedFeedForwardLayerImpl(new Neurons3D(20, 20, 1, true),
             new Neurons3D(18, 18, 1, false), new SigmoidActivationFunction(), matrixFactory, false);
 
-    FullyConnectedFeedForwardLayer firstLayer3 =
-        new FullyConnectedFeedForwardLayerImpl(new Neurons3D(18, 18, 1, true),
-            new Neurons3D(20, 20, 1, false), new SigmoidActivationFunction(), matrixFactory, false);
-
     FullyConnectedFeedForwardLayer secondLayer =
-        new FullyConnectedFeedForwardLayerImpl(new Neurons3D(20, 20, 1, true),
+        new FullyConnectedFeedForwardLayerImpl(new Neurons3D(18, 18, 1, true),
+            new Neurons3D(10, 10, 1, false), new SigmoidActivationFunction(), matrixFactory, false);
+
+    FullyConnectedFeedForwardLayer thirdLayer =
+        new FullyConnectedFeedForwardLayerImpl(new Neurons3D(10, 10, 1, true),
             new Neurons(10, false), new SoftmaxActivationFunction(), matrixFactory, false);
 
     return new SupervisedFeedForwardNeuralNetworkImpl(
-        new ResidualBlockLayerImpl<FullyConnectedAxons, FullyConnectedFeedForwardLayer>(firstLayer,
-            firstLayer2, matrixFactory),
-        firstLayer3, secondLayer);
+        new ResidualBlockLayerImpl<FullyConnectedAxons, FullyConnectedFeedForwardLayer>(firstLayerOfResidualBlock,
+        		secondLayerOfResidualBlock, matrixFactory),
+        secondLayer, thirdLayer);
   }
 
   @Override
@@ -129,7 +129,7 @@ public class ClassifierDemo extends
     FeedForwardNeuralNetworkContext context =
         new FeedForwardNeuralNetworkContextImpl(matrixFactory, 0, null);
     context.setTrainingEpochs(200);
-    context.setTrainingLearningRate(0.05);
+    context.setTrainingLearningRate(0.005);
     context.getLayerContext(0).getSynapsesContext(0).getAxonsContext(0, 0)
         .setLeftHandInputDropoutKeepProbability(0.8);
     // context.getLayerContext(0).getSynapsesContext(0).g
