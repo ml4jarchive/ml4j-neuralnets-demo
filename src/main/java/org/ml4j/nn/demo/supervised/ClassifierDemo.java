@@ -22,7 +22,6 @@ import org.ml4j.nn.FeedForwardNeuralNetworkContext;
 import org.ml4j.nn.ForwardPropagation;
 import org.ml4j.nn.activationfunctions.SigmoidActivationFunction;
 import org.ml4j.nn.activationfunctions.SoftmaxActivationFunction;
-import org.ml4j.nn.axons.FullyConnectedAxons;
 import org.ml4j.nn.demo.base.supervised.SupervisedNeuralNetworkDemoBase;
 import org.ml4j.nn.demo.util.MnistUtils;
 import org.ml4j.nn.demo.util.PixelFeaturesMatrixCsvDataExtractor;
@@ -30,7 +29,6 @@ import org.ml4j.nn.demo.util.SingleDigitLabelsMatrixCsvDataExtractor;
 import org.ml4j.nn.layers.DirectedLayerContext;
 import org.ml4j.nn.layers.FullyConnectedFeedForwardLayer;
 import org.ml4j.nn.layers.FullyConnectedFeedForwardLayerImpl;
-import org.ml4j.nn.layers.ResidualBlockLayerImpl;
 import org.ml4j.nn.neurons.Neurons;
 import org.ml4j.nn.neurons.Neurons3D;
 import org.ml4j.nn.neurons.NeuronsActivation;
@@ -82,8 +80,8 @@ public class ClassifierDemo extends
             new Neurons(10, false), new SoftmaxActivationFunction(), matrixFactory, false);
 
     return new SupervisedFeedForwardNeuralNetworkImpl(
-        new ResidualBlockLayerImpl<FullyConnectedAxons, FullyConnectedFeedForwardLayer>(firstLayerOfResidualBlock,
-        		secondLayerOfResidualBlock, matrixFactory),
+        firstLayerOfResidualBlock,
+        secondLayerOfResidualBlock,
         secondLayer, thirdLayer);
   }
 
