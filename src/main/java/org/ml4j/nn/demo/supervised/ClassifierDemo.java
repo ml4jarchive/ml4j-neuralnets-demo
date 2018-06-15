@@ -27,7 +27,7 @@ import org.ml4j.nn.demo.util.MnistUtils;
 import org.ml4j.nn.demo.util.PixelFeaturesMatrixCsvDataExtractor;
 import org.ml4j.nn.demo.util.SingleDigitLabelsMatrixCsvDataExtractor;
 import org.ml4j.nn.layers.DirectedLayerContext;
-import org.ml4j.nn.layers.FeedForwardLayer;
+import org.ml4j.nn.layers.FullyConnectedFeedForwardLayer;
 import org.ml4j.nn.layers.FullyConnectedFeedForwardLayerImpl;
 import org.ml4j.nn.neurons.Neurons;
 import org.ml4j.nn.neurons.Neurons3D;
@@ -45,8 +45,8 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Michael Lavelle
  */
-public class ClassifierDemo
-    extends SupervisedNeuralNetworkDemoBase<SupervisedFeedForwardNeuralNetwork, 
+public class ClassifierDemo extends
+    SupervisedNeuralNetworkDemoBase<SupervisedFeedForwardNeuralNetwork, 
     FeedForwardNeuralNetworkContext> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ClassifierDemo.class);
@@ -57,34 +57,44 @@ public class ClassifierDemo
   }
 
   @Override
-  protected SupervisedFeedForwardNeuralNetwork 
-      createSupervisedNeuralNetwork(int featureCount) {
+  protected SupervisedFeedForwardNeuralNetwork createSupervisedNeuralNetwork(int featureCount) {
 
     // Construct a 2 layer Neural Network
-    
-    MatrixFactory matrixFactory = createMatrixFactory();
-    
-    FeedForwardLayer<?, ?> firstLayer = new FullyConnectedFeedForwardLayerImpl(
-        new Neurons3D(28, 28 ,1, true), new Neurons3D(20, 20, 1, false), 
-        new SigmoidActivationFunction(), matrixFactory, false);
-    
-    FeedForwardLayer<?, ?> secondLayer = 
-        new FullyConnectedFeedForwardLayerImpl(new Neurons3D(20, 20, 1, true), 
-        new Neurons(10, false), new SoftmaxActivationFunction(), matrixFactory, false);
 
-    return new SupervisedFeedForwardNeuralNetworkImpl(firstLayer, secondLayer);
+    MatrixFactory matrixFactory = createMatrixFactory();
+
+    FullyConnectedFeedForwardLayer firstLayerOfResidualBlock =
+        new FullyConnectedFeedForwardLayerImpl(new Neurons3D(28, 28, 1, true),
+            new Neurons3D(20, 20, 1, false), new SigmoidActivationFunction(), matrixFactory, false);
+
+    FullyConnectedFeedForwardLayer secondLayerOfResidualBlock =
+        new FullyConnectedFeedForwardLayerImpl(new Neurons3D(20, 20, 1, true),
+            new Neurons3D(18, 18, 1, false), new SigmoidActivationFunction(), matrixFactory, false);
+
+    FullyConnectedFeedForwardLayer secondLayer =
+        new FullyConnectedFeedForwardLayerImpl(new Neurons3D(18, 18, 1, true),
+            new Neurons3D(10, 10, 1, false), new SigmoidActivationFunction(), matrixFactory, false);
+
+    FullyConnectedFeedForwardLayer thirdLayer =
+        new FullyConnectedFeedForwardLayerImpl(new Neurons3D(10, 10, 1, true),
+            new Neurons(10, false), new SoftmaxActivationFunction(), matrixFactory, false);
+
+    return new SupervisedFeedForwardNeuralNetworkImpl(
+        firstLayerOfResidualBlock,
+        secondLayerOfResidualBlock,
+        secondLayer, thirdLayer);
   }
 
   @Override
   protected NeuronsActivation createTrainingDataNeuronActivations(MatrixFactory matrixFactory) {
     LOGGER.trace("Creating training data NeuronsActivation");
-    
-    DoubleArrayMatrixLoader loader = new DoubleArrayMatrixLoader(
-            ClassifierDemo.class.getClassLoader());
+
+    DoubleArrayMatrixLoader loader =
+        new DoubleArrayMatrixLoader(ClassifierDemo.class.getClassLoader());
     // Load Mnist data into double[][] matrices
     double[][] trainingDataMatrix = loader.loadDoubleMatrixFromCsv("mnist2500_X_custom.csv",
-            new PixelFeaturesMatrixCsvDataExtractor(), 0, 1000);
-    
+        new PixelFeaturesMatrixCsvDataExtractor(), 0, 1000);
+
     return new NeuronsActivation(matrixFactory.createMatrix(trainingDataMatrix),
         NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
   }
@@ -92,9 +102,9 @@ public class ClassifierDemo
   @Override
   protected NeuronsActivation createTestSetDataNeuronActivations(MatrixFactory matrixFactory) {
     LOGGER.trace("Creating test data NeuronsActivation");
-    
-    DoubleArrayMatrixLoader loader = new DoubleArrayMatrixLoader(
-        ClassifierDemo.class.getClassLoader());
+
+    DoubleArrayMatrixLoader loader =
+        new DoubleArrayMatrixLoader(ClassifierDemo.class.getClassLoader());
     // Load Mnist data into double[][] matrices
     double[][] testDataMatrix = loader.loadDoubleMatrixFromCsv("mnist2500_X_custom.csv",
         new PixelFeaturesMatrixCsvDataExtractor(), 1000, 2000);
@@ -117,58 +127,56 @@ public class ClassifierDemo
     FeedForwardNeuralNetworkContext context =
         new FeedForwardNeuralNetworkContextImpl(matrixFactory, 0, null);
     context.setTrainingEpochs(200);
-    context.setTrainingLearningRate(0.05);
-    context.getLayerContext(0).getSynapsesContext(0).getAxonsContext(0)
-    .setLeftHandInputDropoutKeepProbability(0.8);
+    context.setTrainingLearningRate(0.005);
+    context.getLayerContext(0).getSynapsesContext(0).getAxonsContext(0, 0)
+        .setLeftHandInputDropoutKeepProbability(0.8);
+    // context.getLayerContext(0).getSynapsesContext(0).g
     return context;
   }
-  
+
   @Override
   protected void showcaseTrainedNeuralNetworkOnTrainingSet(
-      SupervisedFeedForwardNeuralNetwork neuralNetwork,
-      NeuronsActivation testDataInputActivations, NeuronsActivation testDataLabelActivations, 
-      MatrixFactory matrixFactory) throws Exception {
-    
+      SupervisedFeedForwardNeuralNetwork neuralNetwork, NeuronsActivation testDataInputActivations,
+      NeuronsActivation testDataLabelActivations, MatrixFactory matrixFactory) throws Exception {
+
     // Create a context for the entire network
-    FeedForwardNeuralNetworkContext accuracyContext =  
+    FeedForwardNeuralNetworkContext accuracyContext =
         new FeedForwardNeuralNetworkContextImpl(matrixFactory, 0, null);
-   
-    double classificationAccuracy = 
-        neuralNetwork.getClassificationAccuracy(testDataInputActivations, 
-            testDataLabelActivations, accuracyContext);
-    
+
+    double classificationAccuracy = neuralNetwork.getClassificationAccuracy(
+        testDataInputActivations, testDataLabelActivations, accuracyContext);
+
     LOGGER.info("Classification training set accuracy:" + classificationAccuracy);
-    
+
   }
 
   @Override
   protected void showcaseTrainedNeuralNetworkOnTestSet(
-      SupervisedFeedForwardNeuralNetwork neuralNetwork,
-      NeuronsActivation testDataInputActivations, NeuronsActivation testDataLabelActivations, 
-      MatrixFactory matrixFactory) throws Exception {
+      SupervisedFeedForwardNeuralNetwork neuralNetwork, NeuronsActivation testDataInputActivations,
+      NeuronsActivation testDataLabelActivations, MatrixFactory matrixFactory) throws Exception {
 
     // Create a context for the entire network
-    FeedForwardNeuralNetworkContext accuracyContext =  
+    FeedForwardNeuralNetworkContext accuracyContext =
         new FeedForwardNeuralNetworkContextImpl(matrixFactory, 0, null);
-   
-    double classificationAccuracy = 
-        neuralNetwork.getClassificationAccuracy(testDataInputActivations, 
-            testDataLabelActivations, accuracyContext);
-    
+
+    double classificationAccuracy = neuralNetwork.getClassificationAccuracy(
+        testDataInputActivations, testDataLabelActivations, accuracyContext);
+
     LOGGER.info("Classification test set accuracy:" + classificationAccuracy);
 
     LOGGER.info("Showcasing trained Classifier...");
 
     // Create display for our demo
     ImageDisplay<Long> display = new ImageDisplay<Long>(280, 280);
-    
+
     // Create a context for the first layer only
-    FeedForwardNeuralNetworkContext autoEncoderNeuronVisualisationContext =  
+    FeedForwardNeuralNetworkContext autoEncoderNeuronVisualisationContext =
         new FeedForwardNeuralNetworkContextImpl(matrixFactory, 0, 0);
-    
-    DirectedLayerContext hiddenNeuronInspectionContext = 
+
+    DirectedLayerContext hiddenNeuronInspectionContext =
         autoEncoderNeuronVisualisationContext.getLayerContext(0);
-    
+
+
     LOGGER.info("Drawing visualisations of patterns sought by the hidden neurons...");
     for (int j = 0; j < neuralNetwork.getFirstLayer().getOutputNeuronCount(); j++) {
       NeuronsActivation neuronActivationMaximisingActivation = neuralNetwork.getFirstLayer()
@@ -185,35 +193,35 @@ public class ClassifierDemo
       MnistUtils.draw(intensities, display);
       Thread.sleep(100);
     }
-    
+
     // Visualise the reconstructions of the input data
-  
+
     LOGGER.info("Visualising data and classifying");
     for (int i = 0; i < 100; i++) {
 
       // For each element in our test set, obtain the compressed encoded features
       Matrix activations = testDataInputActivations.getActivations().getRow(i);
-      
+
       NeuronsActivation orignalActivation = new NeuronsActivation(activations,
           NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
 
       MnistUtils.draw(orignalActivation.getActivations().toArray(), display);
 
       // Encode only through all Layers
-      FeedForwardNeuralNetworkContext classifyingContext = 
+      FeedForwardNeuralNetworkContext classifyingContext =
           new FeedForwardNeuralNetworkContextImpl(matrixFactory, 0, null);
 
-      ForwardPropagation forwardPropagtion = 
+      ForwardPropagation forwardPropagtion =
           neuralNetwork.forwardPropagate(orignalActivation, classifyingContext);
 
       double[] values = forwardPropagtion.getOutputs().getActivations().toArray();
-         
+
       LOGGER.info("Classified digit as:" + getArgMaxIndex(values));
-         
+
       Thread.sleep(2000);
     }
   }
-  
+
   private int getArgMaxIndex(double[] data) {
     int maxValueIndex = 0;
     double maxValue = 0;
@@ -228,24 +236,24 @@ public class ClassifierDemo
 
   @Override
   protected NeuronsActivation createTrainingLabelNeuronActivations(MatrixFactory matrixFactory) {
-    DoubleArrayMatrixLoader loader = new DoubleArrayMatrixLoader(
-        ClassifierDemo.class.getClassLoader());
+    DoubleArrayMatrixLoader loader =
+        new DoubleArrayMatrixLoader(ClassifierDemo.class.getClassLoader());
     // Load Mnist data into double[][] matrices
     double[][] testDataMatrix = loader.loadDoubleMatrixFromCsv("mnist2500_labels_custom.csv",
         new SingleDigitLabelsMatrixCsvDataExtractor(), 0, 1000);
-   
+
     return new NeuronsActivation(matrixFactory.createMatrix(testDataMatrix),
         NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
   }
 
   @Override
   protected NeuronsActivation createTestSetLabelNeuronActivations(MatrixFactory matrixFactory) {
-    DoubleArrayMatrixLoader loader = new DoubleArrayMatrixLoader(
-        ClassifierDemo.class.getClassLoader());
+    DoubleArrayMatrixLoader loader =
+        new DoubleArrayMatrixLoader(ClassifierDemo.class.getClassLoader());
     // Load Mnist data into double[][] matrices
     double[][] testDataMatrix = loader.loadDoubleMatrixFromCsv("mnist2500_labels_custom.csv",
         new SingleDigitLabelsMatrixCsvDataExtractor(), 1000, 2000);
-   
+
     return new NeuronsActivation(matrixFactory.createMatrix(testDataMatrix),
         NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
   }
