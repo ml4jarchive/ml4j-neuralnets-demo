@@ -36,7 +36,7 @@ public class KaggleMnistUtils {
    * @param data The data
    * @param imageDisplay The image display
    */
-  public static void draw(double[] data, ImageDisplay<Long> imageDisplay) {
+  public static void draw(float[] data, ImageDisplay<Long> imageDisplay) {
     double[] pixelData = new double[data.length];
 
     // Rearrange ordering of pixels for display purposes ( default image is

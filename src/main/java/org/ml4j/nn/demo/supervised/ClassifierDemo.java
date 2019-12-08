@@ -17,7 +17,7 @@ package org.ml4j.nn.demo.supervised;
 import org.ml4j.Matrix;
 import org.ml4j.MatrixFactory;
 import org.ml4j.imaging.targets.ImageDisplay;
-import org.ml4j.jblas.JBlasMatrixFactory;
+import org.ml4j.jblas.JBlasRowMajorMatrixFactory;
 import org.ml4j.nn.FeedForwardNeuralNetworkContext;
 import org.ml4j.nn.ForwardPropagation;
 import org.ml4j.nn.activationfunctions.SigmoidActivationFunction;
@@ -26,13 +26,13 @@ import org.ml4j.nn.demo.base.supervised.SupervisedNeuralNetworkDemoBase;
 import org.ml4j.nn.demo.util.MnistUtils;
 import org.ml4j.nn.demo.util.PixelFeaturesMatrixCsvDataExtractor;
 import org.ml4j.nn.demo.util.SingleDigitLabelsMatrixCsvDataExtractor;
-import org.ml4j.nn.layers.DirectedLayerContext;
 import org.ml4j.nn.layers.FeedForwardLayer;
 import org.ml4j.nn.layers.FullyConnectedFeedForwardLayerImpl;
 import org.ml4j.nn.neurons.Neurons;
 import org.ml4j.nn.neurons.Neurons3D;
 import org.ml4j.nn.neurons.NeuronsActivation;
 import org.ml4j.nn.neurons.NeuronsActivationFeatureOrientation;
+import org.ml4j.nn.neurons.NeuronsActivationImpl;
 import org.ml4j.nn.supervised.FeedForwardNeuralNetworkContextImpl;
 import org.ml4j.nn.supervised.SupervisedFeedForwardNeuralNetwork;
 import org.ml4j.nn.supervised.SupervisedFeedForwardNeuralNetworkImpl;
@@ -82,12 +82,22 @@ public class ClassifierDemo
     DoubleArrayMatrixLoader loader = new DoubleArrayMatrixLoader(
             ClassifierDemo.class.getClassLoader());
     // Load Mnist data into double[][] matrices
-    double[][] trainingDataMatrix = loader.loadDoubleMatrixFromCsv("mnist2500_X_custom.csv",
-            new PixelFeaturesMatrixCsvDataExtractor(), 0, 1000);
+    float[][] trainingDataMatrix = toFloatArray(loader.loadDoubleMatrixFromCsv("mnist2500_X_custom.csv",
+            new PixelFeaturesMatrixCsvDataExtractor(), 0, 1000));
     
-    return new NeuronsActivation(matrixFactory.createMatrix(trainingDataMatrix),
-        NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
+    return new NeuronsActivationImpl(matrixFactory.createMatrixFromRows(trainingDataMatrix).transpose(),
+        NeuronsActivationFeatureOrientation.ROWS_SPAN_FEATURE_SET);
   }
+  
+  private float[][] toFloatArray(double[][] data) {
+	  float[][] result = new float[data.length][data[0].length];
+	  for (int r = 0; r < data.length; r++) {
+		  for (int c = 0; c < data[0].length; c++) {
+			  result[r][c] = (float)data[r][c];
+		  }
+	  }
+	  return result;
+  }	
 
   @Override
   protected NeuronsActivation createTestSetDataNeuronActivations(MatrixFactory matrixFactory) {
@@ -96,17 +106,17 @@ public class ClassifierDemo
     DoubleArrayMatrixLoader loader = new DoubleArrayMatrixLoader(
         ClassifierDemo.class.getClassLoader());
     // Load Mnist data into double[][] matrices
-    double[][] testDataMatrix = loader.loadDoubleMatrixFromCsv("mnist2500_X_custom.csv",
-        new PixelFeaturesMatrixCsvDataExtractor(), 1000, 2000);
+    float[][] testDataMatrix = toFloatArray(loader.loadDoubleMatrixFromCsv("mnist2500_X_custom.csv",
+        new PixelFeaturesMatrixCsvDataExtractor(), 1000, 2000));
 
-    return new NeuronsActivation(matrixFactory.createMatrix(testDataMatrix),
-        NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
+    return new NeuronsActivationImpl(matrixFactory.createMatrixFromRows(testDataMatrix).transpose(),
+        NeuronsActivationFeatureOrientation.ROWS_SPAN_FEATURE_SET);
   }
 
   @Override
   protected MatrixFactory createMatrixFactory() {
     LOGGER.trace("Creating MatrixFactory");
-    return new JBlasMatrixFactory();
+    return new JBlasRowMajorMatrixFactory();
   }
 
   @Override
@@ -114,12 +124,14 @@ public class ClassifierDemo
       SupervisedFeedForwardNeuralNetwork supervisedNeuralNetwork, MatrixFactory matrixFactory) {
     LOGGER.trace("Creating FeedForwardNeuralNetworkContext");
     // Train from layer index 0 to the end layer
-    FeedForwardNeuralNetworkContext context =
-        new FeedForwardNeuralNetworkContextImpl(matrixFactory, 0, null);
+  //  FeedForwardNeuralNetworkContext context =
+    //    new FeedForwardNeuralNetworkContextImpl(matrixFactory, 0, null);
+     FeedForwardNeuralNetworkContext context =
+       new FeedForwardNeuralNetworkContextImpl(matrixFactory, true);
     context.setTrainingEpochs(200);
-    context.setTrainingLearningRate(0.05);
-    context.getLayerContext(0).getSynapsesContext(0).getAxonsContext(0)
-    .setLeftHandInputDropoutKeepProbability(0.8);
+    context.setTrainingLearningRate(0.05f);
+   // context.getLayerContext(0).getSynapsesContext(0).getAxonsContext(0)
+    //.setLeftHandInputDropoutKeepProbability(0.8);
     return context;
   }
   
@@ -130,9 +142,12 @@ public class ClassifierDemo
       MatrixFactory matrixFactory) throws Exception {
     
     // Create a context for the entire network
-    FeedForwardNeuralNetworkContext accuracyContext =  
-        new FeedForwardNeuralNetworkContextImpl(matrixFactory, 0, null);
-   
+   // FeedForwardNeuralNetworkContext accuracyContext =  
+     //   new FeedForwardNeuralNetworkContextImpl(matrixFactory, 0, null);
+	   FeedForwardNeuralNetworkContext accuracyContext =  
+			   new FeedForwardNeuralNetworkContextImpl(matrixFactory, false);
+	  
+	  
     double classificationAccuracy = 
         neuralNetwork.getClassificationAccuracy(testDataInputActivations, 
             testDataLabelActivations, accuracyContext);
@@ -148,9 +163,11 @@ public class ClassifierDemo
       MatrixFactory matrixFactory) throws Exception {
 
     // Create a context for the entire network
-    FeedForwardNeuralNetworkContext accuracyContext =  
-        new FeedForwardNeuralNetworkContextImpl(matrixFactory, 0, null);
-   
+  //  FeedForwardNeuralNetworkContext accuracyContext =  
+    //    new FeedForwardNeuralNetworkContextImpl(matrixFactory, 0, null);
+	 FeedForwardNeuralNetworkContext accuracyContext =  
+	        new FeedForwardNeuralNetworkContextImpl(matrixFactory, false);
+	  
     double classificationAccuracy = 
         neuralNetwork.getClassificationAccuracy(testDataInputActivations, 
             testDataLabelActivations, accuracyContext);
@@ -161,7 +178,7 @@ public class ClassifierDemo
 
     // Create display for our demo
     ImageDisplay<Long> display = new ImageDisplay<Long>(280, 280);
-    
+    /*
     // Create a context for the first layer only
     FeedForwardNeuralNetworkContext autoEncoderNeuronVisualisationContext =  
         new FeedForwardNeuralNetworkContextImpl(matrixFactory, 0, 0);
@@ -186,27 +203,29 @@ public class ClassifierDemo
       Thread.sleep(100);
     }
     
+    */
+    
     // Visualise the reconstructions of the input data
   
     LOGGER.info("Visualising data and classifying");
     for (int i = 0; i < 100; i++) {
 
       // For each element in our test set, obtain the compressed encoded features
-      Matrix activations = testDataInputActivations.getActivations().getRow(i);
+      Matrix activations = testDataInputActivations.getActivations(matrixFactory).getColumn(i);
       
-      NeuronsActivation orignalActivation = new NeuronsActivation(activations,
-          NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
+      NeuronsActivation orignalActivation = new NeuronsActivationImpl(activations,
+          NeuronsActivationFeatureOrientation.ROWS_SPAN_FEATURE_SET);
 
-      MnistUtils.draw(orignalActivation.getActivations().toArray(), display);
+      MnistUtils.draw(orignalActivation.getActivations(matrixFactory).getRowByRowArray(), display);
 
       // Encode only through all Layers
       FeedForwardNeuralNetworkContext classifyingContext = 
-          new FeedForwardNeuralNetworkContextImpl(matrixFactory, 0, null);
+          new FeedForwardNeuralNetworkContextImpl(matrixFactory, false);
 
       ForwardPropagation forwardPropagtion = 
           neuralNetwork.forwardPropagate(orignalActivation, classifyingContext);
 
-      double[] values = forwardPropagtion.getOutputs().getActivations().toArray();
+      float[] values = forwardPropagtion.getOutput().getActivations(matrixFactory).getRowByRowArray();
          
       LOGGER.info("Classified digit as:" + getArgMaxIndex(values));
          
@@ -214,7 +233,7 @@ public class ClassifierDemo
     }
   }
   
-  private int getArgMaxIndex(double[] data) {
+  private int getArgMaxIndex(float[] data) {
     int maxValueIndex = 0;
     double maxValue = 0;
     for (int i = 0; i < data.length; i++) {
@@ -231,11 +250,11 @@ public class ClassifierDemo
     DoubleArrayMatrixLoader loader = new DoubleArrayMatrixLoader(
         ClassifierDemo.class.getClassLoader());
     // Load Mnist data into double[][] matrices
-    double[][] testDataMatrix = loader.loadDoubleMatrixFromCsv("mnist2500_labels_custom.csv",
-        new SingleDigitLabelsMatrixCsvDataExtractor(), 0, 1000);
+    float[][] testDataMatrix = toFloatArray(loader.loadDoubleMatrixFromCsv("mnist2500_labels_custom.csv",
+        new SingleDigitLabelsMatrixCsvDataExtractor(), 0, 1000));
    
-    return new NeuronsActivation(matrixFactory.createMatrix(testDataMatrix),
-        NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
+    return new NeuronsActivationImpl(matrixFactory.createMatrixFromRows(testDataMatrix).transpose(),
+        NeuronsActivationFeatureOrientation.ROWS_SPAN_FEATURE_SET);
   }
 
   @Override
@@ -243,10 +262,10 @@ public class ClassifierDemo
     DoubleArrayMatrixLoader loader = new DoubleArrayMatrixLoader(
         ClassifierDemo.class.getClassLoader());
     // Load Mnist data into double[][] matrices
-    double[][] testDataMatrix = loader.loadDoubleMatrixFromCsv("mnist2500_labels_custom.csv",
-        new SingleDigitLabelsMatrixCsvDataExtractor(), 1000, 2000);
+    float[][] testDataMatrix = toFloatArray(loader.loadDoubleMatrixFromCsv("mnist2500_labels_custom.csv",
+        new SingleDigitLabelsMatrixCsvDataExtractor(), 1000, 2000));
    
-    return new NeuronsActivation(matrixFactory.createMatrix(testDataMatrix),
-        NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
+    return new NeuronsActivationImpl(matrixFactory.createMatrixFromRows(testDataMatrix).transpose(),
+        NeuronsActivationFeatureOrientation.ROWS_SPAN_FEATURE_SET);
   }
 }

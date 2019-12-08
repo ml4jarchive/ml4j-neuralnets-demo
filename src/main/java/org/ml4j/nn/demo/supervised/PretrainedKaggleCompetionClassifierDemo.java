@@ -17,7 +17,7 @@ package org.ml4j.nn.demo.supervised;
 import org.ml4j.Matrix;
 import org.ml4j.MatrixFactory;
 import org.ml4j.imaging.targets.ImageDisplay;
-import org.ml4j.jblas.JBlasMatrixFactory;
+import org.ml4j.jblas.JBlasRowMajorMatrixFactory;
 import org.ml4j.nn.FeedForwardNeuralNetworkContext;
 import org.ml4j.nn.ForwardPropagation;
 import org.ml4j.nn.activationfunctions.SigmoidActivationFunction;
@@ -35,6 +35,7 @@ import org.ml4j.nn.neurons.Neurons;
 import org.ml4j.nn.neurons.Neurons3D;
 import org.ml4j.nn.neurons.NeuronsActivation;
 import org.ml4j.nn.neurons.NeuronsActivationFeatureOrientation;
+import org.ml4j.nn.neurons.NeuronsActivationImpl;
 import org.ml4j.nn.supervised.FeedForwardNeuralNetworkContextImpl;
 import org.ml4j.nn.supervised.SupervisedFeedForwardNeuralNetwork;
 import org.ml4j.nn.supervised.SupervisedFeedForwardNeuralNetworkImpl;
@@ -71,16 +72,19 @@ public class PretrainedKaggleCompetionClassifierDemo
     
     // Load some pre-trained weights learned from our Kaggle competition entry.
     SerializationHelper helper = new SerializationHelper(
-        PretrainedKaggleCompetionClassifierDemo.class.getClassLoader(), "pretrainedkaggleweights");
+        PretrainedKaggleCompetionClassifierDemo.class.getClassLoader(), "pretrainedweights");
 
-    Matrix layer1Weights =
-        matrixFactory.createMatrix(helper.deserialize(double[][].class, "layer1"));
-    Matrix layer3Weights =
-        matrixFactory.createMatrix(helper.deserialize(double[][].class, "layer3"));
-    Matrix layer4Weights =
-        matrixFactory.createMatrix(helper.deserialize(double[][].class, "layer4"));
-    Matrix layer5Weights =
-        matrixFactory.createMatrix(helper.deserialize(double[][].class, "layer5"));
+    Matrix layer1Weights = matrixFactory.createMatrixFromRowsByRowsArray(6, 81, helper.deserialize(float[].class, "layer1Weights"));
+    Matrix layer1Biases = matrixFactory.createMatrixFromRowsByRowsArray(6, 1,  helper.deserialize(float[].class, "layer1Biases"));
+
+    Matrix layer3Weights = matrixFactory.createMatrixFromRowsByRowsArray(400, 600, helper.deserialize(float[].class, "layer3Weights"));
+    Matrix layer3Biases = matrixFactory.createMatrixFromRowsByRowsArray(400, 1,  helper.deserialize(float[].class, "layer3Biases"));
+
+    Matrix layer4Weights = matrixFactory.createMatrixFromRowsByRowsArray(100, 400, helper.deserialize(float[].class, "layer4Weights"));
+    Matrix layer4Biases = matrixFactory.createMatrixFromRowsByRowsArray(100, 1,  helper.deserialize(float[].class, "layer4Biases"));
+    
+    Matrix layer5Weights = matrixFactory.createMatrixFromRowsByRowsArray(10, 100, helper.deserialize(float[].class, "layer5Weights"));
+    Matrix layer5Biases = matrixFactory.createMatrixFromRowsByRowsArray(10, 1,  helper.deserialize(float[].class, "layer5Biases"));
 
     
     // Construct a Neural Network in the same shape as our Kaggle entry.
@@ -88,7 +92,7 @@ public class PretrainedKaggleCompetionClassifierDemo
     
     FeedForwardLayer<?, ?> firstLayer = new ConvolutionalFeedForwardLayerImpl(
         new Neurons3D(28, 28 ,1, true), new Neurons3D(20, 20, 6, false), 
-        new SigmoidActivationFunction(), matrixFactory, layer1Weights, false);
+        new SigmoidActivationFunction(), matrixFactory, layer1Weights, layer1Biases, false);
             
     // The max pooling layer that this NN was trained with originally was a legacy
     // implementation which scaled up the output activations by a factor of
@@ -96,22 +100,22 @@ public class PretrainedKaggleCompetionClassifierDemo
     // legacy situation.  Normally we would set this property to false
     FeedForwardLayer<?, ?> secondLayer = 
         new MaxPoolingFeedForwardLayerImpl(new Neurons3D(20, 20, 6, false), 
-            new Neurons3D(10, 10, 6, false), matrixFactory, true, false);
+            new Neurons3D(10, 10, 6, false), matrixFactory, true, 2);
    
     FeedForwardLayer<?, ?> thirdLayer = 
         new FullyConnectedFeedForwardLayerImpl(new Neurons3D(10, 10, 6, true), 
             new Neurons3D(5, 5, 16, false), new SigmoidActivationFunction(), 
-            matrixFactory, layer3Weights, false);
+            matrixFactory, layer3Weights, layer3Biases, false);
     
     FeedForwardLayer<?, ?> forthLayer = 
         new FullyConnectedFeedForwardLayerImpl(new Neurons(400, true), 
         new Neurons(100, false), new SigmoidActivationFunction(), matrixFactory,
-        layer4Weights, false);
+        layer4Weights, layer4Biases, false);
     
     FeedForwardLayer<?, ?> fifthLayer = 
         new FullyConnectedFeedForwardLayerImpl(new Neurons(100, true), 
         new Neurons(10, false), new SoftmaxActivationFunction(), matrixFactory,
-        layer5Weights, false);
+        layer5Weights, layer5Biases, false);
 
     return new SupervisedFeedForwardNeuralNetworkImpl(firstLayer, secondLayer,
         thirdLayer, forthLayer, fifthLayer);
@@ -124,12 +128,23 @@ public class PretrainedKaggleCompetionClassifierDemo
     DoubleArrayMatrixLoader loader = new DoubleArrayMatrixLoader(
             PretrainedKaggleCompetionClassifierDemo.class.getClassLoader());
     // Load Mnist data into double[][] matrices
-    double[][] trainingDataMatrix = loader.loadDoubleMatrixFromCsv("train.csv",
-            new KagglePixelFeaturesMatrixCsvDataExtractor(), 1, 1001);
+    float[][] trainingDataMatrix = toFloatArray(loader.loadDoubleMatrixFromCsv("train.csv",
+            new KagglePixelFeaturesMatrixCsvDataExtractor(), 1, 1001));
     
-    return new NeuronsActivation(matrixFactory.createMatrix(trainingDataMatrix),
+    return new NeuronsActivationImpl(matrixFactory.createMatrixFromRows(trainingDataMatrix),
         NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
   }
+  
+  private float[][] toFloatArray(double[][] data) {
+	  float[][] result = new float[data.length][data[0].length];
+	  for (int r = 0; r < data.length; r++) {
+		  for (int c = 0; c < data[0].length; c++) {
+			  result[r][c] = (float)data[r][c];
+		  }
+	  }
+	  return result;
+  }	
+
 
   @Override
   protected NeuronsActivation createTestSetDataNeuronActivations(MatrixFactory matrixFactory) {
@@ -138,17 +153,17 @@ public class PretrainedKaggleCompetionClassifierDemo
     DoubleArrayMatrixLoader loader = new DoubleArrayMatrixLoader(
         PretrainedKaggleCompetionClassifierDemo.class.getClassLoader());
     // Load Mnist data into double[][] matrices
-    double[][] testDataMatrix = loader.loadDoubleMatrixFromCsv("train.csv",
-        new KagglePixelFeaturesMatrixCsvDataExtractor(), 1001, 2001);
+    float[][] testDataMatrix = toFloatArray(loader.loadDoubleMatrixFromCsv("train.csv",
+        new KagglePixelFeaturesMatrixCsvDataExtractor(), 1001, 2001));
 
-    return new NeuronsActivation(matrixFactory.createMatrix(testDataMatrix),
+    return new NeuronsActivationImpl(matrixFactory.createMatrixFromRows(testDataMatrix),
         NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
   }
 
   @Override
   protected MatrixFactory createMatrixFactory() {
     LOGGER.trace("Creating MatrixFactory");
-    return new JBlasMatrixFactory();
+    return new JBlasRowMajorMatrixFactory();
   }
 
   @Override
@@ -156,8 +171,10 @@ public class PretrainedKaggleCompetionClassifierDemo
       SupervisedFeedForwardNeuralNetwork supervisedNeuralNetwork, MatrixFactory matrixFactory) {
     LOGGER.trace("Creating FeedForwardNeuralNetworkContext");
     // Train from layer index 0 to the end layer
+   //FeedForwardNeuralNetworkContext context =
+     //   new FeedForwardNeuralNetworkContextImpl(matrixFactory, 0, null);
     FeedForwardNeuralNetworkContext context =
-        new FeedForwardNeuralNetworkContextImpl(matrixFactory, 0, null);
+            new FeedForwardNeuralNetworkContextImpl(matrixFactory, true);
     context.setTrainingEpochs(0);
     return context;
   }
@@ -169,9 +186,12 @@ public class PretrainedKaggleCompetionClassifierDemo
       MatrixFactory matrixFactory) throws Exception {
     
     // Create a context for the entire network
-    FeedForwardNeuralNetworkContext accuracyContext =  
-        new FeedForwardNeuralNetworkContextImpl(matrixFactory, 0, null);
+   // FeedForwardNeuralNetworkContext accuracyContext =  
+     //   new FeedForwardNeuralNetworkContextImpl(matrixFactory, 0, null);
    
+	   FeedForwardNeuralNetworkContext accuracyContext =  
+	       new FeedForwardNeuralNetworkContextImpl(matrixFactory, false);
+	  
     double classificationAccuracy = 
         neuralNetwork.getClassificationAccuracy(testDataInputActivations, 
             testDataLabelActivations, accuracyContext);
@@ -188,7 +208,7 @@ public class PretrainedKaggleCompetionClassifierDemo
 
     // Create a context for the entire network
     FeedForwardNeuralNetworkContext accuracyContext =  
-        new FeedForwardNeuralNetworkContextImpl(matrixFactory, 0, null);
+        new FeedForwardNeuralNetworkContextImpl(matrixFactory, false);
    
     double classificationAccuracy = 
         neuralNetwork.getClassificationAccuracy(testDataInputActivations, 
@@ -202,8 +222,13 @@ public class PretrainedKaggleCompetionClassifierDemo
     ImageDisplay<Long> display = new ImageDisplay<Long>(280, 280);
     
     // Create a context for the first layer only
+ //   FeedForwardNeuralNetworkContext autoEncoderNeuronVisualisationContext =  
+   //     new FeedForwardNeuralNetworkContextImpl(matrixFactory, 0, 0);
+    
     FeedForwardNeuralNetworkContext autoEncoderNeuronVisualisationContext =  
-        new FeedForwardNeuralNetworkContextImpl(matrixFactory, 0, 0);
+    		new FeedForwardNeuralNetworkContextImpl(matrixFactory, false);
+    
+    /*
     
     DirectedLayerContext hiddenNeuronInspectionContext = 
         autoEncoderNeuronVisualisationContext.getLayerContext(0);
@@ -215,15 +240,17 @@ public class PretrainedKaggleCompetionClassifierDemo
       double[] neuronActivationMaximisingFeatures =
           neuronActivationMaximisingActivation.getActivations().toArray();
 
-      double[] intensities = new double[neuronActivationMaximisingFeatures.length];
+      float[] intensities = new float[neuronActivationMaximisingFeatures.length];
       for (int i = 0; i < intensities.length; i++) {
         double val = neuronActivationMaximisingFeatures[i];
         double boundary = 0.02;
-        intensities[i] = val < -boundary ? 0 : val > boundary ? 1 : 0.5;
+        intensities[i] = val < -boundary ? 0f : val > boundary ? 1f : 0.5f;
       }
       KaggleMnistUtils.draw(intensities, display);
       Thread.sleep(5);
     }
+    
+    */
     
     // Visualise the reconstructions of the input data
   
@@ -231,21 +258,21 @@ public class PretrainedKaggleCompetionClassifierDemo
     for (int i = 0; i < 100; i++) {
 
       // For each element in our test set, obtain the compressed encoded features
-      Matrix activations = testDataInputActivations.getActivations().getRow(i);
+      Matrix activations = testDataInputActivations.getActivations(matrixFactory).getRow(i);
       
-      NeuronsActivation orignalActivation = new NeuronsActivation(activations,
+      NeuronsActivation orignalActivation = new NeuronsActivationImpl(activations,
           NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
 
-      KaggleMnistUtils.draw(orignalActivation.getActivations().toArray(), display);
+      KaggleMnistUtils.draw(orignalActivation.getActivations(matrixFactory).getRowByRowArray(), display);
 
       // Encode only through all Layers
       FeedForwardNeuralNetworkContext classifyingContext = 
-          new FeedForwardNeuralNetworkContextImpl(matrixFactory, 0, null);
+          new FeedForwardNeuralNetworkContextImpl(matrixFactory, false);
 
       ForwardPropagation forwardPropagtion = 
           neuralNetwork.forwardPropagate(orignalActivation, classifyingContext);
 
-      double[] values = forwardPropagtion.getOutputs().getActivations().toArray();
+      float[] values = forwardPropagtion.getOutput().getActivations(matrixFactory).getRowByRowArray();
          
       LOGGER.info("Classified digit as:" + getArgMaxIndex(values));
          
@@ -253,7 +280,7 @@ public class PretrainedKaggleCompetionClassifierDemo
     }
   }
   
-  private int getArgMaxIndex(double[] data) {
+  private int getArgMaxIndex(float[] data) {
     int maxValueIndex = 0;
     double maxValue = 0;
     for (int i = 0; i < data.length; i++) {
@@ -270,10 +297,10 @@ public class PretrainedKaggleCompetionClassifierDemo
     DoubleArrayMatrixLoader loader = new DoubleArrayMatrixLoader(
         PretrainedKaggleCompetionClassifierDemo.class.getClassLoader());
     // Load Mnist data into double[][] matrices
-    double[][] testDataMatrix = loader.loadDoubleMatrixFromCsv("train.csv",
-        new SingleDigitLabelsMatrixCsvDataExtractor(), 1, 1001);
+    float[][] testDataMatrix = toFloatArray(loader.loadDoubleMatrixFromCsv("train.csv",
+        new SingleDigitLabelsMatrixCsvDataExtractor(), 1, 1001));
    
-    return new NeuronsActivation(matrixFactory.createMatrix(testDataMatrix),
+    return new NeuronsActivationImpl(matrixFactory.createMatrixFromRows(testDataMatrix),
         NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
   }
 
@@ -282,10 +309,10 @@ public class PretrainedKaggleCompetionClassifierDemo
     DoubleArrayMatrixLoader loader = new DoubleArrayMatrixLoader(
         PretrainedKaggleCompetionClassifierDemo.class.getClassLoader());
     // Load Mnist data into double[][] matrices
-    double[][] testDataMatrix = loader.loadDoubleMatrixFromCsv("train.csv",
-        new SingleDigitLabelsMatrixCsvDataExtractor(), 1001, 2001);
+    float[][] testDataMatrix = toFloatArray(loader.loadDoubleMatrixFromCsv("train.csv",
+        new SingleDigitLabelsMatrixCsvDataExtractor(), 1001, 2001));
    
-    return new NeuronsActivation(matrixFactory.createMatrix(testDataMatrix),
+    return new NeuronsActivationImpl(matrixFactory.createMatrixFromRows(testDataMatrix),
         NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
   }
 }
