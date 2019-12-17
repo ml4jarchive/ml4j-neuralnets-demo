@@ -20,9 +20,11 @@ import org.ml4j.imaging.targets.ImageDisplay;
 import org.ml4j.jblas.JBlasRowMajorMatrixFactory;
 import org.ml4j.nn.activationfunctions.SigmoidActivationFunction;
 import org.ml4j.nn.axons.TrainableAxons;
+import org.ml4j.nn.axons.factories.AxonsFactory;
 import org.ml4j.nn.demo.base.unsupervised.UnsupervisedNeuralNetworkDemoBase;
 import org.ml4j.nn.demo.util.MnistUtils;
 import org.ml4j.nn.demo.util.PixelFeaturesMatrixCsvDataExtractor;
+import org.ml4j.nn.factories.DefaultAxonsFactoryImpl;
 import org.ml4j.nn.layers.RestrictedBoltzmannLayer;
 import org.ml4j.nn.layers.RestrictedBoltzmannLayerImpl;
 import org.ml4j.nn.layers.UndirectedLayerContext;
@@ -67,6 +69,8 @@ public class RestrictedBoltzmannMachineDemo extends
     // Construct a RestrictedBoltzmannMachine
 
     MatrixFactory matrixFactory = createMatrixFactory();
+    
+    AxonsFactory axonsFactory = new DefaultAxonsFactoryImpl(matrixFactory);
 
     NeuronsActivation trainingDataActivations = createTrainingDataNeuronActivations(matrixFactory);
 
@@ -87,7 +91,7 @@ public class RestrictedBoltzmannMachineDemo extends
     Matrix initialRightToLeftBiases = initialConnectionWeightsAndBiases.getColumn(0).getRows(inds).transpose();
 
     RestrictedBoltzmannLayer<TrainableAxons<?, ?, ?>> restrictedBoltmannLayer =
-        new RestrictedBoltzmannLayerImpl(new Neurons3D(28, 28, 1, true), new Neurons(100, true),
+        new RestrictedBoltzmannLayerImpl(axonsFactory, new Neurons3D(28, 28, 1, true), new Neurons(100, true),
             new SigmoidActivationFunction(), new SigmoidActivationFunction(), matrixFactory,
             initialConnectionWeights, initialLeftToRightBiases, initialRightToLeftBiases.transpose());
 

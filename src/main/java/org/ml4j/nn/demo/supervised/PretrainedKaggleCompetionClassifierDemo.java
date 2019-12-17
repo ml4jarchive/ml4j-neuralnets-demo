@@ -22,12 +22,17 @@ import org.ml4j.nn.FeedForwardNeuralNetworkContext;
 import org.ml4j.nn.ForwardPropagation;
 import org.ml4j.nn.activationfunctions.SigmoidActivationFunction;
 import org.ml4j.nn.activationfunctions.SoftmaxActivationFunction;
+import org.ml4j.nn.activationfunctions.factories.DifferentiableActivationFunctionFactory;
+import org.ml4j.nn.axons.factories.AxonsFactory;
+import org.ml4j.nn.components.factories.DirectedComponentFactory;
 import org.ml4j.nn.demo.base.supervised.SupervisedNeuralNetworkDemoBase;
 import org.ml4j.nn.demo.util.KaggleMnistUtils;
 import org.ml4j.nn.demo.util.KagglePixelFeaturesMatrixCsvDataExtractor;
 import org.ml4j.nn.demo.util.SingleDigitLabelsMatrixCsvDataExtractor;
+import org.ml4j.nn.factories.DefaultAxonsFactoryImpl;
+import org.ml4j.nn.factories.DefaultDifferentiableActivationFunctionFactory;
+import org.ml4j.nn.factories.DefaultDirectedComponentFactoryImpl;
 import org.ml4j.nn.layers.ConvolutionalFeedForwardLayerImpl;
-import org.ml4j.nn.layers.DirectedLayerContext;
 import org.ml4j.nn.layers.FeedForwardLayer;
 import org.ml4j.nn.layers.FullyConnectedFeedForwardLayerImpl;
 import org.ml4j.nn.layers.MaxPoolingFeedForwardLayerImpl;
@@ -87,11 +92,17 @@ public class PretrainedKaggleCompetionClassifierDemo
     Matrix layer5Biases = matrixFactory.createMatrixFromRowsByRowsArray(10, 1,  helper.deserialize(float[].class, "layer5Biases"));
 
     
+    AxonsFactory axonsFactory = new DefaultAxonsFactoryImpl(matrixFactory);
+    
+    DifferentiableActivationFunctionFactory activationFunctionFactory = new DefaultDifferentiableActivationFunctionFactory();
+    
+    DirectedComponentFactory directedComponentFactory = new DefaultDirectedComponentFactoryImpl(matrixFactory, axonsFactory);
+    
     // Construct a Neural Network in the same shape as our Kaggle entry.
     // Initialise each trainable layer with our pre-trained weights.
     
-    FeedForwardLayer<?, ?> firstLayer = new ConvolutionalFeedForwardLayerImpl(
-        new Neurons3D(28, 28 ,1, true), new Neurons3D(20, 20, 6, false), 
+    FeedForwardLayer<?, ?> firstLayer = new ConvolutionalFeedForwardLayerImpl(directedComponentFactory,
+        axonsFactory, new Neurons3D(28, 28 ,1, true), new Neurons3D(20, 20, 6, false), 
         new SigmoidActivationFunction(), matrixFactory, layer1Weights, layer1Biases, false);
             
     // The max pooling layer that this NN was trained with originally was a legacy
@@ -99,21 +110,21 @@ public class PretrainedKaggleCompetionClassifierDemo
     // 4.   Here we set the "scaleOutputs" property to true to account for this
     // legacy situation.  Normally we would set this property to false
     FeedForwardLayer<?, ?> secondLayer = 
-        new MaxPoolingFeedForwardLayerImpl(new Neurons3D(20, 20, 6, false), 
-            new Neurons3D(10, 10, 6, false), matrixFactory, true, 2);
+        new MaxPoolingFeedForwardLayerImpl(directedComponentFactory, axonsFactory, activationFunctionFactory, new Neurons3D(20, 20, 6, false), 
+            new Neurons3D(10, 10, 6, false), matrixFactory, true, false, 2);
    
     FeedForwardLayer<?, ?> thirdLayer = 
-        new FullyConnectedFeedForwardLayerImpl(new Neurons3D(10, 10, 6, true), 
+        new FullyConnectedFeedForwardLayerImpl(directedComponentFactory, axonsFactory, new Neurons3D(10, 10, 6, true), 
             new Neurons3D(5, 5, 16, false), new SigmoidActivationFunction(), 
             matrixFactory, layer3Weights, layer3Biases, false);
     
     FeedForwardLayer<?, ?> forthLayer = 
-        new FullyConnectedFeedForwardLayerImpl(new Neurons(400, true), 
+        new FullyConnectedFeedForwardLayerImpl(directedComponentFactory, axonsFactory, new Neurons(400, true), 
         new Neurons(100, false), new SigmoidActivationFunction(), matrixFactory,
         layer4Weights, layer4Biases, false);
     
     FeedForwardLayer<?, ?> fifthLayer = 
-        new FullyConnectedFeedForwardLayerImpl(new Neurons(100, true), 
+        new FullyConnectedFeedForwardLayerImpl(directedComponentFactory, axonsFactory, new Neurons(100, true), 
         new Neurons(10, false), new SoftmaxActivationFunction(), matrixFactory,
         layer5Weights, layer5Biases, false);
 

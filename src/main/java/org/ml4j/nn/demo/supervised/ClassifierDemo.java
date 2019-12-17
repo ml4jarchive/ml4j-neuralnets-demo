@@ -22,10 +22,14 @@ import org.ml4j.nn.FeedForwardNeuralNetworkContext;
 import org.ml4j.nn.ForwardPropagation;
 import org.ml4j.nn.activationfunctions.SigmoidActivationFunction;
 import org.ml4j.nn.activationfunctions.SoftmaxActivationFunction;
+import org.ml4j.nn.axons.factories.AxonsFactory;
+import org.ml4j.nn.components.factories.DirectedComponentFactory;
 import org.ml4j.nn.demo.base.supervised.SupervisedNeuralNetworkDemoBase;
 import org.ml4j.nn.demo.util.MnistUtils;
 import org.ml4j.nn.demo.util.PixelFeaturesMatrixCsvDataExtractor;
 import org.ml4j.nn.demo.util.SingleDigitLabelsMatrixCsvDataExtractor;
+import org.ml4j.nn.factories.DefaultAxonsFactoryImpl;
+import org.ml4j.nn.factories.DefaultDirectedComponentFactoryImpl;
 import org.ml4j.nn.layers.FeedForwardLayer;
 import org.ml4j.nn.layers.FullyConnectedFeedForwardLayerImpl;
 import org.ml4j.nn.neurons.Neurons;
@@ -64,12 +68,16 @@ public class ClassifierDemo
     
     MatrixFactory matrixFactory = createMatrixFactory();
     
-    FeedForwardLayer<?, ?> firstLayer = new FullyConnectedFeedForwardLayerImpl(
-        new Neurons3D(28, 28 ,1, true), new Neurons3D(20, 20, 1, false), 
+    AxonsFactory axonsFactory = new DefaultAxonsFactoryImpl(matrixFactory);
+    
+    DirectedComponentFactory directedComponentFactory = new DefaultDirectedComponentFactoryImpl(matrixFactory, axonsFactory);
+    
+    FeedForwardLayer<?, ?> firstLayer = new FullyConnectedFeedForwardLayerImpl(directedComponentFactory, 
+        axonsFactory, new Neurons3D(28, 28 ,1, true), new Neurons3D(20, 20, 1, false), 
         new SigmoidActivationFunction(), matrixFactory, false);
     
     FeedForwardLayer<?, ?> secondLayer = 
-        new FullyConnectedFeedForwardLayerImpl(new Neurons3D(20, 20, 1, true), 
+        new FullyConnectedFeedForwardLayerImpl(directedComponentFactory, axonsFactory, new Neurons3D(20, 20, 1, true), 
         new Neurons(10, false), new SoftmaxActivationFunction(), matrixFactory, false);
 
     return new SupervisedFeedForwardNeuralNetworkImpl(firstLayer, secondLayer);
