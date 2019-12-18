@@ -12,6 +12,13 @@
 	</distributionManagement>
 	<repositories>
 		<repository>
+			<id>ml4j-releases</id>
+			<url>https://raw.githubusercontent.com/ml4j/mvn-repository/master/releases</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+		<repository>
 			<id>ml4j-snapshots</id>
 			<url>https://raw.githubusercontent.com/ml4j/mvn-repository/master/snapshots</url>
 			<snapshots>
@@ -27,24 +34,44 @@
 		</dependency>
 		<dependency>
 			<groupId>org.ml4j</groupId>
-			<artifactId>ml4j-matrices-impl</artifactId>
+			<artifactId>ml4j-nn-impl</artifactId>
 			<version>2.0.0-SNAPSHOT</version>
 		</dependency>
-		<dependency>
+	<dependency>
+			<groupId>org.ml4j</groupId>
+			<artifactId>ml4j-layered-nn-impl</artifactId>
+			<version>2.0.0-SNAPSHOT</version>
+		</dependency>
+			<dependency>
 			<groupId>org.ml4j</groupId>
 			<artifactId>ml4j-layers-impl</artifactId>
 			<version>2.0.0-SNAPSHOT</version>
 		</dependency>
-		<dependency>
+					<dependency>
 			<groupId>org.ml4j</groupId>
-			<artifactId>ml4j-nn-impl</artifactId>
+			<artifactId>ml4j-prototype-components</artifactId>
 			<version>2.0.0-SNAPSHOT</version>
 		</dependency>
+		
+
+		<!-- 
+		<dependency>
+			<groupId>org.ml4j</groupId>
+			<artifactId>ml4j-matrices-impl</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.ml4j</groupId>
+			<artifactId>ml4j-layers-impl</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+		
 		<dependency>
 			<groupId>org.ml4j</groupId>
 			<artifactId>ml4j-synapses-impl</artifactId>
-			<version>2.0.0-SNAPSHOT</version>
+			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
+		 -->
 		<dependency>
 			<groupId>org.ml4j</groupId>
 			<artifactId>ml4j-imaging</artifactId>
@@ -84,8 +111,8 @@
 							<configLocation>google_checks.xml</configLocation>
 							<encoding>UTF-8</encoding>
 							<consoleOutput>true</consoleOutput>
-							<failsOnError>true</failsOnError>
-							<failOnViolation>true</failOnViolation>
+							<failsOnError>false</failsOnError>
+							<failOnViolation>false</failOnViolation>
 							<violationSeverity>warning</violationSeverity>
 							<linkXRef>false</linkXRef>
 						</configuration>
