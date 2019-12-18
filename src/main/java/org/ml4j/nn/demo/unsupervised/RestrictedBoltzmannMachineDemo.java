@@ -150,7 +150,7 @@ public class RestrictedBoltzmannMachineDemo extends
         new RestrictedBoltzmannMachineContextImpl(matrixFactory, true);
     context.setTrainingEpochs(300);
     context.setTrainingLearningRate(learningRate);
-    context.setTrainingMiniBatchSize(32);
+    //context.setTrainingMiniBatchSize(64);
     return context;
   }
 
