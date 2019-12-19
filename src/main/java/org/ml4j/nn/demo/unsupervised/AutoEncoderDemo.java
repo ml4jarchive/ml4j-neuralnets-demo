@@ -77,7 +77,7 @@ public class AutoEncoderDemo
         new FullyConnectedFeedForwardLayerImpl(directedComponentFactory, axonsFactory, new Neurons(200, true), 
         new Neurons3D(28, 28 ,1, false), new SigmoidActivationFunction(), matrixFactory, false);
 
-    return new AutoEncoderImpl(encodingLayer, decodingLayer);
+    return new AutoEncoderImpl(directedComponentFactory, encodingLayer, decodingLayer);
   }
 
   @Override

@@ -140,7 +140,7 @@ public class PretrainedKaggleCompetionClassifierDemo
         new Neurons(10, false), new SoftmaxActivationFunction(), matrixFactory,
         layer5Weights, layer5Biases, false);
 
-    return new LayeredSupervisedFeedForwardNeuralNetworkImpl(Arrays.asList(firstLayer, secondLayer,
+    return new LayeredSupervisedFeedForwardNeuralNetworkImpl(directedComponentFactory, Arrays.asList(firstLayer, secondLayer,
         thirdLayer, forthLayer, fifthLayer));
   }
 

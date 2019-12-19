@@ -80,7 +80,7 @@ public class ClassifierDemo
         new FullyConnectedFeedForwardLayerImpl(directedComponentFactory, axonsFactory, new Neurons3D(20, 20, 1, true), 
         new Neurons(10, false), new SoftmaxActivationFunction(), matrixFactory, false);
 
-    return new SupervisedFeedForwardNeuralNetworkImpl(firstLayer, secondLayer);
+    return new SupervisedFeedForwardNeuralNetworkImpl(directedComponentFactory, firstLayer, secondLayer);
   }
 
   @Override
