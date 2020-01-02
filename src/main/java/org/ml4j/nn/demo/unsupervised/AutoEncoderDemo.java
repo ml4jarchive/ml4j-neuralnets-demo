@@ -24,8 +24,8 @@ import org.ml4j.nn.components.factories.DirectedComponentFactory;
 import org.ml4j.nn.demo.base.unsupervised.UnsupervisedNeuralNetworkDemoBase;
 import org.ml4j.nn.demo.util.MnistUtils;
 import org.ml4j.nn.demo.util.PixelFeaturesMatrixCsvDataExtractor;
-import org.ml4j.nn.factories.DefaultAxonsFactoryImpl;
 import org.ml4j.nn.factories.DefaultDirectedComponentFactoryImpl;
+import org.ml4j.nn.factories.PrototypeAxonsFactoryImpl;
 import org.ml4j.nn.layers.DirectedLayerContext;
 import org.ml4j.nn.layers.FeedForwardLayer;
 import org.ml4j.nn.layers.FullyConnectedFeedForwardLayerImpl;
@@ -65,7 +65,7 @@ public class AutoEncoderDemo
     
     MatrixFactory matrixFactory = createMatrixFactory();
     
-    AxonsFactory axonsFactory = new DefaultAxonsFactoryImpl(matrixFactory);
+    AxonsFactory axonsFactory = new PrototypeAxonsFactoryImpl(matrixFactory);
     
     DirectedComponentFactory directedComponentFactory = new DefaultDirectedComponentFactoryImpl(matrixFactory, axonsFactory);
     

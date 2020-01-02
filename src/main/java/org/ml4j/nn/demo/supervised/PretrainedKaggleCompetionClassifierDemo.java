@@ -31,9 +31,9 @@ import org.ml4j.nn.demo.base.supervised.SupervisedNeuralNetworkDemoBase;
 import org.ml4j.nn.demo.util.KaggleMnistUtils;
 import org.ml4j.nn.demo.util.KagglePixelFeaturesMatrixCsvDataExtractor;
 import org.ml4j.nn.demo.util.SingleDigitLabelsMatrixCsvDataExtractor;
-import org.ml4j.nn.factories.DefaultAxonsFactoryImpl;
-import org.ml4j.nn.factories.DefaultDifferentiableActivationFunctionFactory;
 import org.ml4j.nn.factories.DefaultDirectedComponentFactoryImpl;
+import org.ml4j.nn.factories.PrototypeAxonsFactoryImpl;
+import org.ml4j.nn.factories.PrototypeDifferentiableActivationFunctionFactory;
 import org.ml4j.nn.layers.ConvolutionalFeedForwardLayerImpl;
 import org.ml4j.nn.layers.DirectedLayerContext;
 import org.ml4j.nn.layers.FeedForwardLayer;
@@ -87,11 +87,11 @@ public class PretrainedKaggleCompetionClassifierDemo
     
     MatrixFactory matrixFactory = createMatrixFactory();
     
-    AxonsFactory axonsFactory = new DefaultAxonsFactoryImpl(matrixFactory);
+    AxonsFactory axonsFactory = new PrototypeAxonsFactoryImpl(matrixFactory);
     
     DirectedComponentFactory directedComponentFactory = new DefaultDirectedComponentFactoryImpl(matrixFactory, axonsFactory);
     
-    DifferentiableActivationFunctionFactory differentiableActivationFunctionFactory = new DefaultDifferentiableActivationFunctionFactory();
+    DifferentiableActivationFunctionFactory differentiableActivationFunctionFactory = new PrototypeDifferentiableActivationFunctionFactory();
 
     
     // Load some pre-trained weights learned from our Kaggle competition entry.

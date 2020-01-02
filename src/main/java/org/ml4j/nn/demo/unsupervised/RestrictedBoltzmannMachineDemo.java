@@ -24,7 +24,7 @@ import org.ml4j.nn.axons.factories.AxonsFactory;
 import org.ml4j.nn.demo.base.unsupervised.UnsupervisedNeuralNetworkDemoBase;
 import org.ml4j.nn.demo.util.MnistUtils;
 import org.ml4j.nn.demo.util.PixelFeaturesMatrixCsvDataExtractor;
-import org.ml4j.nn.factories.DefaultAxonsFactoryImpl;
+import org.ml4j.nn.factories.PrototypeAxonsFactoryImpl;
 import org.ml4j.nn.layers.RestrictedBoltzmannLayer;
 import org.ml4j.nn.layers.RestrictedBoltzmannLayerImpl;
 import org.ml4j.nn.layers.UndirectedLayerContext;
@@ -70,7 +70,7 @@ public class RestrictedBoltzmannMachineDemo extends
 
     MatrixFactory matrixFactory = createMatrixFactory();
     
-    AxonsFactory axonsFactory = new DefaultAxonsFactoryImpl(matrixFactory);
+    AxonsFactory axonsFactory = new PrototypeAxonsFactoryImpl(matrixFactory);
 
     NeuronsActivation trainingDataActivations = createTrainingDataNeuronActivations(matrixFactory);
 

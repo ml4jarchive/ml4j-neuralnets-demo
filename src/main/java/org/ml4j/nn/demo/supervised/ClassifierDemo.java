@@ -28,8 +28,8 @@ import org.ml4j.nn.demo.base.supervised.SupervisedNeuralNetworkDemoBase;
 import org.ml4j.nn.demo.util.MnistUtils;
 import org.ml4j.nn.demo.util.PixelFeaturesMatrixCsvDataExtractor;
 import org.ml4j.nn.demo.util.SingleDigitLabelsMatrixCsvDataExtractor;
-import org.ml4j.nn.factories.DefaultAxonsFactoryImpl;
 import org.ml4j.nn.factories.DefaultDirectedComponentFactoryImpl;
+import org.ml4j.nn.factories.PrototypeAxonsFactoryImpl;
 import org.ml4j.nn.layers.FeedForwardLayer;
 import org.ml4j.nn.layers.FullyConnectedFeedForwardLayerImpl;
 import org.ml4j.nn.neurons.Neurons;
@@ -68,7 +68,7 @@ public class ClassifierDemo
     
     MatrixFactory matrixFactory = createMatrixFactory();
     
-    AxonsFactory axonsFactory = new DefaultAxonsFactoryImpl(matrixFactory);
+    AxonsFactory axonsFactory = new PrototypeAxonsFactoryImpl(matrixFactory);
     
     DirectedComponentFactory directedComponentFactory = new DefaultDirectedComponentFactoryImpl(matrixFactory, axonsFactory);
     
