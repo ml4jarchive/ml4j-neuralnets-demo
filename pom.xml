@@ -47,11 +47,6 @@
 			<artifactId>ml4j-layers-impl</artifactId>
 			<version>2.0.0-SNAPSHOT</version>
 		</dependency>
-					<dependency>
-			<groupId>org.ml4j</groupId>
-			<artifactId>ml4j-prototype-components</artifactId>
-			<version>2.0.0-SNAPSHOT</version>
-		</dependency>
 			<dependency>
 			<groupId>org.ml4j</groupId>
 			<artifactId>ml4j-default-components</artifactId>

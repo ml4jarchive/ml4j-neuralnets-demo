@@ -22,8 +22,8 @@ import org.ml4j.imaging.targets.ImageDisplay;
 import org.ml4j.jblas.JBlasRowMajorMatrixFactory;
 import org.ml4j.nn.ForwardPropagation;
 import org.ml4j.nn.LayeredFeedForwardNeuralNetworkContext;
-import org.ml4j.nn.activationfunctions.SigmoidActivationFunction;
-import org.ml4j.nn.activationfunctions.SoftmaxActivationFunction;
+import org.ml4j.nn.activationfunctions.DefaultSigmoidActivationFunctionImpl;
+import org.ml4j.nn.activationfunctions.DefaultSoftmaxActivationFunctionImpl;
 import org.ml4j.nn.activationfunctions.factories.DifferentiableActivationFunctionFactory;
 import org.ml4j.nn.axons.factories.AxonsFactory;
 import org.ml4j.nn.components.factories.DirectedComponentFactory;
@@ -31,9 +31,9 @@ import org.ml4j.nn.demo.base.supervised.SupervisedNeuralNetworkDemoBase;
 import org.ml4j.nn.demo.util.KaggleMnistUtils;
 import org.ml4j.nn.demo.util.KagglePixelFeaturesMatrixCsvDataExtractor;
 import org.ml4j.nn.demo.util.SingleDigitLabelsMatrixCsvDataExtractor;
+import org.ml4j.nn.factories.DefaultAxonsFactoryImpl;
+import org.ml4j.nn.factories.DefaultDifferentiableActivationFunctionFactory;
 import org.ml4j.nn.factories.DefaultDirectedComponentFactoryImpl;
-import org.ml4j.nn.factories.PrototypeAxonsFactoryImpl;
-import org.ml4j.nn.factories.PrototypeDifferentiableActivationFunctionFactory;
 import org.ml4j.nn.layers.ConvolutionalFeedForwardLayerImpl;
 import org.ml4j.nn.layers.DirectedLayerContext;
 import org.ml4j.nn.layers.FeedForwardLayer;
@@ -87,11 +87,11 @@ public class PretrainedKaggleCompetionClassifierDemo
     
     MatrixFactory matrixFactory = createMatrixFactory();
     
-    AxonsFactory axonsFactory = new PrototypeAxonsFactoryImpl(matrixFactory);
+    AxonsFactory axonsFactory = new DefaultAxonsFactoryImpl(matrixFactory);
     
     DirectedComponentFactory directedComponentFactory = new DefaultDirectedComponentFactoryImpl(matrixFactory, axonsFactory);
     
-    DifferentiableActivationFunctionFactory differentiableActivationFunctionFactory = new PrototypeDifferentiableActivationFunctionFactory();
+    DifferentiableActivationFunctionFactory differentiableActivationFunctionFactory = new DefaultDifferentiableActivationFunctionFactory();
 
     
     // Load some pre-trained weights learned from our Kaggle competition entry.
@@ -115,7 +115,7 @@ public class PretrainedKaggleCompetionClassifierDemo
     
     FeedForwardLayer<?, ?> firstLayer = new ConvolutionalFeedForwardLayerImpl(
         directedComponentFactory, axonsFactory, new Neurons3D(28, 28 ,1, true), new Neurons3D(20, 20, 6, false), 
-        new SigmoidActivationFunction(), matrixFactory, layer1Weights, layer1Biases, false);
+        new DefaultSigmoidActivationFunctionImpl(), matrixFactory, layer1Weights, layer1Biases, false);
             
     // The max pooling layer that this NN was trained with originally was a legacy
     // implementation which scaled up the output activations by a factor of
@@ -127,17 +127,17 @@ public class PretrainedKaggleCompetionClassifierDemo
    
     FeedForwardLayer<?, ?> thirdLayer = 
         new FullyConnectedFeedForwardLayerImpl(directedComponentFactory, axonsFactory, new Neurons3D(10, 10, 6, true), 
-            new Neurons3D(5, 5, 16, false), new SigmoidActivationFunction(), 
+            new Neurons3D(5, 5, 16, false), new DefaultSigmoidActivationFunctionImpl(), 
             matrixFactory, layer3Weights, layer3Biases, false);
     
     FeedForwardLayer<?, ?> forthLayer = 
         new FullyConnectedFeedForwardLayerImpl(directedComponentFactory, axonsFactory, new Neurons(400, true), 
-        new Neurons(100, false), new SigmoidActivationFunction(), matrixFactory,
+        new Neurons(100, false), new DefaultSigmoidActivationFunctionImpl(), matrixFactory,
         layer4Weights, layer4Biases, false);
     
     FeedForwardLayer<?, ?> fifthLayer = 
         new FullyConnectedFeedForwardLayerImpl(directedComponentFactory, axonsFactory, new Neurons(100, true), 
-        new Neurons(10, false), new SoftmaxActivationFunction(), matrixFactory,
+        new Neurons(10, false), new DefaultSoftmaxActivationFunctionImpl(), matrixFactory,
         layer5Weights, layer5Biases, false);
 
     return new LayeredSupervisedFeedForwardNeuralNetworkImpl(directedComponentFactory, Arrays.asList(firstLayer, secondLayer,
@@ -323,6 +323,7 @@ protected LayeredFeedForwardNeuralNetworkContext createTrainingContext(
 	      new LayeredFeedForwardNeuralNetworkContextImpl(matrixFactory, 0, null, true);
 	  context.setTrainingEpochs(5);
 	  context.setTrainingLearningRate(0.01f);
+	  context.getLayerContext(0).getSynapsesContext(0).getAxonsContext(0, 0).withLeftHandInputDropoutKeepProbability(0.5f);
 	  return context;
 }
 }
