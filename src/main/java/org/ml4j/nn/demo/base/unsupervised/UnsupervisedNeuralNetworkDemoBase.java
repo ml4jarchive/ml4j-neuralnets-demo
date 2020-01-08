@@ -28,7 +28,7 @@ import org.ml4j.nn.unsupervised.UnsupervisedNeuralNetwork;
  * @param <C> The type of runtime NeuralNetworkContext for this UnsupervisedNeuralNetwork
  */
 public abstract class UnsupervisedNeuralNetworkDemoBase<N 
-    extends UnsupervisedNeuralNetwork<?, C, ?>, C extends NeuralNetworkContext> {
+    extends UnsupervisedNeuralNetwork<C, N>, C extends NeuralNetworkContext> {
 
   /**
    * Run the demo.
@@ -46,7 +46,7 @@ public abstract class UnsupervisedNeuralNetworkDemoBase<N
         createTrainingDataNeuronActivations(matrixFactory);
 
     // Determine the feature counts and bias inclusion of the training data
-    int inputFeatureCount = trainingDataInputActivations.getActivations().getColumns();
+    int inputFeatureCount = trainingDataInputActivations.getActivations(matrixFactory).getColumns();
 
     // Create the neural network for this feature count and bias
     N unsupervisedNeuralNetwork =

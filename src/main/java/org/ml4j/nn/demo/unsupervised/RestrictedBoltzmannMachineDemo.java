@@ -17,12 +17,14 @@ package org.ml4j.nn.demo.unsupervised;
 import org.ml4j.Matrix;
 import org.ml4j.MatrixFactory;
 import org.ml4j.imaging.targets.ImageDisplay;
-import org.ml4j.jblas.JBlasMatrixFactory;
-import org.ml4j.nn.activationfunctions.SigmoidActivationFunction;
-import org.ml4j.nn.axons.FullyConnectedAxons;
+import org.ml4j.jblas.JBlasRowMajorMatrixFactory;
+import org.ml4j.nn.activationfunctions.DefaultSigmoidActivationFunctionImpl;
+import org.ml4j.nn.axons.TrainableAxons;
+import org.ml4j.nn.axons.factories.AxonsFactory;
 import org.ml4j.nn.demo.base.unsupervised.UnsupervisedNeuralNetworkDemoBase;
 import org.ml4j.nn.demo.util.MnistUtils;
 import org.ml4j.nn.demo.util.PixelFeaturesMatrixCsvDataExtractor;
+import org.ml4j.nn.factories.DefaultAxonsFactoryImpl;
 import org.ml4j.nn.layers.RestrictedBoltzmannLayer;
 import org.ml4j.nn.layers.RestrictedBoltzmannLayerImpl;
 import org.ml4j.nn.layers.UndirectedLayerContext;
@@ -31,6 +33,7 @@ import org.ml4j.nn.neurons.Neurons;
 import org.ml4j.nn.neurons.Neurons3D;
 import org.ml4j.nn.neurons.NeuronsActivation;
 import org.ml4j.nn.neurons.NeuronsActivationFeatureOrientation;
+import org.ml4j.nn.neurons.NeuronsActivationImpl;
 import org.ml4j.nn.unsupervised.RestrictedBoltzmannMachine;
 import org.ml4j.nn.unsupervised.RestrictedBoltzmannMachineContext;
 import org.ml4j.nn.unsupervised.RestrictedBoltzmannMachineContextImpl;
@@ -50,7 +53,7 @@ public class RestrictedBoltzmannMachineDemo extends
     UnsupervisedNeuralNetworkDemoBase<RestrictedBoltzmannMachine, 
     RestrictedBoltzmannMachineContext> {
 
-  private double learningRate = 0.01;
+  private float learningRate = 0.01f;
 
   private static final Logger LOGGER =
       LoggerFactory.getLogger(RestrictedBoltzmannMachineDemo.class);
@@ -66,20 +69,44 @@ public class RestrictedBoltzmannMachineDemo extends
     // Construct a RestrictedBoltzmannMachine
 
     MatrixFactory matrixFactory = createMatrixFactory();
+    
+    AxonsFactory axonsFactory = new DefaultAxonsFactoryImpl(matrixFactory);
 
     NeuronsActivation trainingDataActivations = createTrainingDataNeuronActivations(matrixFactory);
 
-    Matrix initialConnectionWeights =
+    Matrix initialConnectionWeightsAndBiases =
         RestrictedBoltzmannLayerImpl.generateInitialConnectionWeights(trainingDataActivations,
             new Neurons3D(28, 28, 1, true), new Neurons(100, true), learningRate, matrixFactory);
+    
+    int[] inds = new int[initialConnectionWeightsAndBiases.getRows() - 1];
+    for (int i = 0; i < inds.length; i++) {
+    	inds[i] = i + 1;
+    }
+    int[] inds2 = new int[initialConnectionWeightsAndBiases.getColumns() - 1];
+    for (int i = 0; i < inds2.length; i++) {
+    	inds2[i] = i + 1;
+    }
+    Matrix initialConnectionWeights = initialConnectionWeightsAndBiases.getRows(inds).getColumns(inds2).transpose();
+    Matrix initialLeftToRightBiases = initialConnectionWeightsAndBiases.getRow(0).getColumns(inds2).transpose();
+    Matrix initialRightToLeftBiases = initialConnectionWeightsAndBiases.getColumn(0).getRows(inds).transpose();
 
-    RestrictedBoltzmannLayer<FullyConnectedAxons> restrictedBoltmannLayer =
-        new RestrictedBoltzmannLayerImpl(new Neurons3D(28, 28, 1, true), new Neurons(100, true),
-            new SigmoidActivationFunction(), new SigmoidActivationFunction(), matrixFactory,
-            initialConnectionWeights);
+    RestrictedBoltzmannLayer<TrainableAxons<?, ?, ?>> restrictedBoltmannLayer =
+        new RestrictedBoltzmannLayerImpl(axonsFactory, new Neurons3D(28, 28, 1, true), new Neurons(100, true),
+            new DefaultSigmoidActivationFunctionImpl(), new DefaultSigmoidActivationFunctionImpl(), matrixFactory,
+            initialConnectionWeights, initialLeftToRightBiases, initialRightToLeftBiases.transpose());
 
     return new RestrictedBoltzmannMachineImpl(restrictedBoltmannLayer);
   }
+  
+  private float[][] toFloatArray(double[][] data) {
+	  float[][] result = new float[data.length][data[0].length];
+	  for (int r = 0; r < data.length; r++) {
+		  for (int c = 0; c < data[0].length; c++) {
+			  result[r][c] = (float)data[r][c];
+		  }
+	  }
+	  return result;
+  }	
 
   @Override
   protected NeuronsActivation createTrainingDataNeuronActivations(MatrixFactory matrixFactory) {
@@ -88,11 +115,11 @@ public class RestrictedBoltzmannMachineDemo extends
     DoubleArrayMatrixLoader loader =
         new DoubleArrayMatrixLoader(RestrictedBoltzmannMachineDemo.class.getClassLoader());
     // Load Mnist data into double[][] matrices
-    double[][] trainingDataMatrix = loader.loadDoubleMatrixFromCsv("mnist2500_X_custom.csv",
-        new PixelFeaturesMatrixCsvDataExtractor(), 0, 1000);
+    float[][] trainingDataMatrix = toFloatArray(loader.loadDoubleMatrixFromCsv("mnist2500_X_custom.csv",
+        new PixelFeaturesMatrixCsvDataExtractor(), 0, 1000));
 
-    return new NeuronsActivation(matrixFactory.createMatrix(trainingDataMatrix),
-        NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
+    return new NeuronsActivationImpl(matrixFactory.createMatrixFromRows(trainingDataMatrix).transpose(),
+        NeuronsActivationFeatureOrientation.ROWS_SPAN_FEATURE_SET);
   }
 
   @Override
@@ -102,17 +129,17 @@ public class RestrictedBoltzmannMachineDemo extends
     DoubleArrayMatrixLoader loader =
         new DoubleArrayMatrixLoader(RestrictedBoltzmannMachineDemo.class.getClassLoader());
     // Load Mnist data into double[][] matrices
-    double[][] testDataMatrix = loader.loadDoubleMatrixFromCsv("mnist2500_X_custom.csv",
-        new PixelFeaturesMatrixCsvDataExtractor(), 1000, 2000);
+    float[][] testDataMatrix = toFloatArray(loader.loadDoubleMatrixFromCsv("mnist2500_X_custom.csv",
+        new PixelFeaturesMatrixCsvDataExtractor(), 1000, 2000));
 
-    return new NeuronsActivation(matrixFactory.createMatrix(testDataMatrix),
-        NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET);
+    return new NeuronsActivationImpl(matrixFactory.createMatrixFromRows(testDataMatrix).transpose(),
+        NeuronsActivationFeatureOrientation.ROWS_SPAN_FEATURE_SET);
   }
 
   @Override
   protected MatrixFactory createMatrixFactory() {
     LOGGER.trace("Creating MatrixFactory");
-    return new JBlasMatrixFactory();
+    return new JBlasRowMajorMatrixFactory();
   }
 
   @Override
@@ -120,10 +147,10 @@ public class RestrictedBoltzmannMachineDemo extends
       RestrictedBoltzmannMachine unsupervisedNeuralNetwork, MatrixFactory matrixFactory) {
     LOGGER.trace("Creating RestrictedBoltzmannMachineContext");
     RestrictedBoltzmannMachineContext context =
-        new RestrictedBoltzmannMachineContextImpl(matrixFactory);
-    context.setTrainingEpochs(200);
+        new RestrictedBoltzmannMachineContextImpl(matrixFactory, true);
+    context.setTrainingEpochs(300);
     context.setTrainingLearningRate(learningRate);
-    context.setTrainingMiniBatchSize(32);
+    //context.setTrainingMiniBatchSize(64);
     return context;
   }
 
@@ -133,54 +160,54 @@ public class RestrictedBoltzmannMachineDemo extends
     LOGGER.info("Showcasing trained RestrictedBoltzmannMachine...");
 
     // Create display for our demo
-    ImageDisplay<Long> display = new ImageDisplay<Long>(280, 280);
+    ImageDisplay<Long> display = new ImageDisplay<>(280, 280);
 
 
     RestrictedBoltzmannMachineContext samplingContext =
-        new RestrictedBoltzmannMachineContextImpl(matrixFactory);
+        new RestrictedBoltzmannMachineContextImpl(matrixFactory, false);
     
     LOGGER.info("Drawing visualisations of patterns sought by the hidden neurons...");
-    for (int j = 0; j < restrictedBoltzmannMachine.getFirstLayer().getHiddenNeurons()
+    for (int j = 0; j < restrictedBoltzmannMachine.getLayer().getHiddenNeurons()
         .getNeuronCountExcludingBias(); j++) {
       UndirectedLayerContext hiddenNeuronInspectionContext =
-          new UndirectedLayerContextImpl(0, matrixFactory);
+          new UndirectedLayerContextImpl(0, matrixFactory, false);
       NeuronsActivation neuronActivationMaximisingActivation =
-          restrictedBoltzmannMachine.getFirstLayer().getOptimalVisibleActivationsForHiddenNeuron(j,
-              hiddenNeuronInspectionContext);
-      double[] neuronActivationMaximisingFeatures =
-          neuronActivationMaximisingActivation.getActivations().toArray();
+          restrictedBoltzmannMachine.getLayer().getOptimalVisibleActivationsForHiddenNeuron(j,
+              hiddenNeuronInspectionContext, matrixFactory);
+      float[] neuronActivationMaximisingFeatures =
+          neuronActivationMaximisingActivation.getActivations(matrixFactory).getRowByRowArray();
 
-      double[] intensities = new double[neuronActivationMaximisingFeatures.length];
+      float[] intensities = new float[neuronActivationMaximisingFeatures.length];
       for (int i = 0; i < intensities.length; i++) {
         double val = neuronActivationMaximisingFeatures[i];
         double boundary = 0.02;
-        intensities[i] = val < -boundary ? 0 : val > boundary ? 1 : 0.5;
+        intensities[i] = val < -boundary ? 0f : val > boundary ? 1f : 0.5f;
       }
       MnistUtils.draw(intensities, display);
       Thread.sleep(100);
     }
     
     LOGGER.info("Generating sample data using Gibbs sampling..");
-    Matrix visibleActivations = testDataInputActivations.getActivations().getRow(5);
+    Matrix visibleActivations = testDataInputActivations.getActivations(matrixFactory).getColumn(5);
 
     for (int k = 0; k < 10000; k++) {
 
       RestrictedBoltzmannSamplingActivation samplingResult =
           restrictedBoltzmannMachine.performGibbsSampling(
-              new NeuronsActivation(visibleActivations,
-                  NeuronsActivationFeatureOrientation.COLUMNS_SPAN_FEATURE_SET),
+              new NeuronsActivationImpl(visibleActivations,
+                  NeuronsActivationFeatureOrientation.ROWS_SPAN_FEATURE_SET),
               500, samplingContext);
 
       NeuronsActivation finalReconstruction = samplingResult
           .getLastVisibleNeuronsReconstructionLayerActivation().getVisibleActivationProbablities();
 
-      visibleActivations = finalReconstruction.getActivations();
+      visibleActivations = finalReconstruction.getActivations(matrixFactory);
 
-      double[] reconstructionFeatures = finalReconstruction.getActivations().toArray();
+      float[] reconstructionFeatures = finalReconstruction.getActivations(matrixFactory).getRowByRowArray();
 
-      double[] intensities = new double[reconstructionFeatures.length];
+      float[] intensities = new float[reconstructionFeatures.length];
       for (int i = 0; i < intensities.length; i++) {
-        double val = reconstructionFeatures[i];
+        float val = reconstructionFeatures[i];
         intensities[i] = val;
       }
       MnistUtils.draw(intensities, display);

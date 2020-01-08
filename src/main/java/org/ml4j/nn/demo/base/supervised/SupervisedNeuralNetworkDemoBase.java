@@ -28,7 +28,7 @@ import org.ml4j.nn.supervised.SupervisedNeuralNetwork;
  * @param <C> The type of runtime NeuralNetworkContext for this SupervisedNeuralNetwork
  */
 public abstract class SupervisedNeuralNetworkDemoBase<N 
-    extends SupervisedNeuralNetwork<?, C, ?>, C extends NeuralNetworkContext> {
+    extends SupervisedNeuralNetwork<C, N>, C extends NeuralNetworkContext> {
 
   /**
    * Run the demo.
@@ -50,7 +50,7 @@ public abstract class SupervisedNeuralNetworkDemoBase<N
         createTrainingLabelNeuronActivations(matrixFactory);
 
     // Determine the feature counts and bias inclusion of the training data
-    int inputFeatureCount = trainingDataInputActivations.getActivations().getColumns();
+    int inputFeatureCount = trainingDataInputActivations.getActivations(matrixFactory).getColumns();
 
     // Create the neural network for this feature count and bias
     N supervisedNeuralNetwork =
