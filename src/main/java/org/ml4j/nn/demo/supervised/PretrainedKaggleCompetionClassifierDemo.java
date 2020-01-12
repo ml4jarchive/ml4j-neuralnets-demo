@@ -89,7 +89,9 @@ public class PretrainedKaggleCompetionClassifierDemo
     
     AxonsFactory axonsFactory = new DefaultAxonsFactoryImpl(matrixFactory);
     
-    DirectedComponentFactory directedComponentFactory = new DefaultDirectedComponentFactoryImpl(matrixFactory, axonsFactory);
+    DifferentiableActivationFunctionFactory activationFunctionFactory = new DefaultDifferentiableActivationFunctionFactory();
+    
+    DirectedComponentFactory directedComponentFactory = new DefaultDirectedComponentFactoryImpl(matrixFactory, axonsFactory, activationFunctionFactory);
     
     DifferentiableActivationFunctionFactory differentiableActivationFunctionFactory = new DefaultDifferentiableActivationFunctionFactory();
 

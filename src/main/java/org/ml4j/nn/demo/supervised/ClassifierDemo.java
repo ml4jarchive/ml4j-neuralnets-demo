@@ -22,6 +22,7 @@ import org.ml4j.nn.FeedForwardNeuralNetworkContext;
 import org.ml4j.nn.ForwardPropagation;
 import org.ml4j.nn.activationfunctions.DefaultSigmoidActivationFunctionImpl;
 import org.ml4j.nn.activationfunctions.DefaultSoftmaxActivationFunctionImpl;
+import org.ml4j.nn.activationfunctions.factories.DifferentiableActivationFunctionFactory;
 import org.ml4j.nn.axons.factories.AxonsFactory;
 import org.ml4j.nn.components.factories.DirectedComponentFactory;
 import org.ml4j.nn.demo.base.supervised.SupervisedNeuralNetworkDemoBase;
@@ -29,6 +30,7 @@ import org.ml4j.nn.demo.util.MnistUtils;
 import org.ml4j.nn.demo.util.PixelFeaturesMatrixCsvDataExtractor;
 import org.ml4j.nn.demo.util.SingleDigitLabelsMatrixCsvDataExtractor;
 import org.ml4j.nn.factories.DefaultAxonsFactoryImpl;
+import org.ml4j.nn.factories.DefaultDifferentiableActivationFunctionFactory;
 import org.ml4j.nn.factories.DefaultDirectedComponentFactoryImpl;
 import org.ml4j.nn.layers.FeedForwardLayer;
 import org.ml4j.nn.layers.FullyConnectedFeedForwardLayerImpl;
@@ -70,7 +72,9 @@ public class ClassifierDemo
     
     AxonsFactory axonsFactory = new DefaultAxonsFactoryImpl(matrixFactory);
     
-    DirectedComponentFactory directedComponentFactory = new DefaultDirectedComponentFactoryImpl(matrixFactory, axonsFactory);
+    DifferentiableActivationFunctionFactory activationFunctionFactory = new DefaultDifferentiableActivationFunctionFactory();
+    
+    DirectedComponentFactory directedComponentFactory = new DefaultDirectedComponentFactoryImpl(matrixFactory, axonsFactory, activationFunctionFactory);
     
     FeedForwardLayer<?, ?> firstLayer = new FullyConnectedFeedForwardLayerImpl(directedComponentFactory, 
         axonsFactory, new Neurons3D(28, 28 ,1, true), new Neurons3D(20, 20, 1, false), 
