@@ -209,6 +209,10 @@ public class PretrainedKaggleCompetionClassifierDemo
       LayeredSupervisedFeedForwardNeuralNetwork neuralNetwork,
       NeuronsActivation testDataInputActivations, NeuronsActivation testDataLabelActivations, 
       MatrixFactory matrixFactory) throws Exception {
+	  
+	  // Temporarily prevent the test set activations being closed throughout this demo. TODO. Implement auto-locking of first input
+	  // in activation chain to prevent closure by default.
+	  testDataInputActivations.setImmutable(true);
 
     // Create a context for the entire network
 	  LayeredFeedForwardNeuralNetworkContext accuracyContext =  
