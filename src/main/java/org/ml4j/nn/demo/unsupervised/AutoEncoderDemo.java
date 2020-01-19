@@ -94,7 +94,7 @@ public class AutoEncoderDemo
     float[][] trainingDataMatrix = toFloatArray(loader.loadDoubleMatrixFromCsv("mnist2500_X_custom.csv",
             new PixelFeaturesMatrixCsvDataExtractor(), 0, 500));
     
-    return new NeuronsActivationImpl(matrixFactory.createMatrixFromRows(trainingDataMatrix).transpose(),
+    return new NeuronsActivationImpl(new Neurons(trainingDataMatrix[0].length, false), matrixFactory.createMatrixFromRows(trainingDataMatrix).transpose(),
         NeuronsActivationFeatureOrientation.ROWS_SPAN_FEATURE_SET);
   }
 
@@ -108,7 +108,7 @@ public class AutoEncoderDemo
     float[][] testDataMatrix = toFloatArray(loader.loadDoubleMatrixFromCsv("mnist2500_X_custom.csv",
         new PixelFeaturesMatrixCsvDataExtractor(), 1000, 2000));
 
-    return new NeuronsActivationImpl(matrixFactory.createMatrixFromRows(testDataMatrix).transpose(),
+    return new NeuronsActivationImpl(new Neurons(testDataMatrix[0].length, false), matrixFactory.createMatrixFromRows(testDataMatrix).transpose(),
         NeuronsActivationFeatureOrientation.ROWS_SPAN_FEATURE_SET);
   }
   
@@ -179,7 +179,7 @@ public class AutoEncoderDemo
       // For each element in our test set, obtain the compressed encoded features
       Matrix activations = testDataInputActivations.getActivations(matrixFactory).getColumn(i);
       
-      NeuronsActivation orignalActivation = new NeuronsActivationImpl(activations,
+      NeuronsActivation orignalActivation = new NeuronsActivationImpl(new Neurons(activations.getRows(), false), activations,
           NeuronsActivationFeatureOrientation.ROWS_SPAN_FEATURE_SET);
 
       MnistUtils.draw(orignalActivation.getActivations(matrixFactory).getRowByRowArray(), display);

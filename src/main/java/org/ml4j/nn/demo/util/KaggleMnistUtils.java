@@ -14,13 +14,13 @@
 
 package org.ml4j.nn.demo.util;
 
-import org.ml4j.imaging.SerializableBufferedImageAdapter;
-import org.ml4j.imaging.targets.ImageDisplay;
-
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
+
+import org.ml4j.imaging.SerializableBufferedImageAdapter;
+import org.ml4j.imaging.targets.ImageDisplay;
 
 /**
  * Utility class to display the Kaggle Mnist images.
