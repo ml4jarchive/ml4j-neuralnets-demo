@@ -29,7 +29,7 @@ import org.ml4j.nn.layers.RestrictedBoltzmannLayer;
 import org.ml4j.nn.layers.RestrictedBoltzmannLayerImpl;
 import org.ml4j.nn.layers.UndirectedLayerContext;
 import org.ml4j.nn.layers.UndirectedLayerContextImpl;
-import org.ml4j.nn.neurons.Neurons1D;
+import org.ml4j.nn.neurons.Neurons;
 import org.ml4j.nn.neurons.Neurons3D;
 import org.ml4j.nn.neurons.NeuronsActivation;
 import org.ml4j.nn.neurons.NeuronsActivationFeatureOrientation;
@@ -76,7 +76,7 @@ public class RestrictedBoltzmannMachineDemo extends
 
     Matrix initialConnectionWeightsAndBiases =
         RestrictedBoltzmannLayerImpl.generateInitialConnectionWeights(trainingDataActivations,
-            new Neurons3D(28, 28, 1, true), new Neurons1D(100, true), learningRate, matrixFactory);
+            new Neurons3D(28, 28, 1, true), new Neurons(100, true), learningRate, matrixFactory);
     
     int[] inds = new int[initialConnectionWeightsAndBiases.getRows() - 1];
     for (int i = 0; i < inds.length; i++) {
@@ -91,7 +91,7 @@ public class RestrictedBoltzmannMachineDemo extends
     Matrix initialRightToLeftBiases = initialConnectionWeightsAndBiases.getColumn(0).getRows(inds).transpose();
 
     RestrictedBoltzmannLayer<TrainableAxons<?, ?, ?>> restrictedBoltmannLayer =
-        new RestrictedBoltzmannLayerImpl(axonsFactory, new Neurons3D(28, 28, 1, true), new Neurons1D(100, true),
+        new RestrictedBoltzmannLayerImpl(axonsFactory, new Neurons3D(28, 28, 1, true), new Neurons(100, true),
             new DefaultSigmoidActivationFunctionImpl(), new DefaultSigmoidActivationFunctionImpl(), matrixFactory,
             initialConnectionWeights, initialLeftToRightBiases, initialRightToLeftBiases.transpose());
 
@@ -118,7 +118,7 @@ public class RestrictedBoltzmannMachineDemo extends
     float[][] trainingDataMatrix = toFloatArray(loader.loadDoubleMatrixFromCsv("mnist2500_X_custom.csv",
         new PixelFeaturesMatrixCsvDataExtractor(), 0, 1000));
 
-    return new NeuronsActivationImpl(new Neurons1D(trainingDataMatrix[0].length, false), matrixFactory.createMatrixFromRows(trainingDataMatrix).transpose(),
+    return new NeuronsActivationImpl(new Neurons(trainingDataMatrix[0].length, false), matrixFactory.createMatrixFromRows(trainingDataMatrix).transpose(),
         NeuronsActivationFeatureOrientation.ROWS_SPAN_FEATURE_SET);
   }
 
@@ -132,7 +132,7 @@ public class RestrictedBoltzmannMachineDemo extends
     float[][] testDataMatrix = toFloatArray(loader.loadDoubleMatrixFromCsv("mnist2500_X_custom.csv",
         new PixelFeaturesMatrixCsvDataExtractor(), 1000, 2000));
 
-    return new NeuronsActivationImpl(new Neurons1D(testDataMatrix[0].length, false), matrixFactory.createMatrixFromRows(testDataMatrix).transpose(),
+    return new NeuronsActivationImpl(new Neurons(testDataMatrix[0].length, false), matrixFactory.createMatrixFromRows(testDataMatrix).transpose(),
         NeuronsActivationFeatureOrientation.ROWS_SPAN_FEATURE_SET);
   }
 
@@ -194,7 +194,7 @@ public class RestrictedBoltzmannMachineDemo extends
 
       RestrictedBoltzmannSamplingActivation samplingResult =
           restrictedBoltzmannMachine.performGibbsSampling(
-              new NeuronsActivationImpl(new Neurons1D(visibleActivations.getRows(), false), visibleActivations,
+              new NeuronsActivationImpl(new Neurons(visibleActivations.getRows(), false), visibleActivations,
                   NeuronsActivationFeatureOrientation.ROWS_SPAN_FEATURE_SET),
               500, samplingContext);
 
