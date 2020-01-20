@@ -17,20 +17,20 @@ package org.ml4j.nn.demo.util;
 import org.ml4j.util.MultiClassLabelsMatrixCsvDataExtractor;
 
 /**
- * Maps text files containing one single digit (range 0-9) on each row to multiclass label vectors.
+ * Maps text files containing one single digit (range 0-9) on each row to
+ * multiclass label vectors.
  * 
  * @author Michael Lavelle
  *
  */
-public class SingleDigitLabelsMatrixCsvDataExtractor
-    extends MultiClassLabelsMatrixCsvDataExtractor {
+public class SingleDigitLabelsMatrixCsvDataExtractor extends MultiClassLabelsMatrixCsvDataExtractor {
 
-  public SingleDigitLabelsMatrixCsvDataExtractor() {
-    super(10);
-  }
+	public SingleDigitLabelsMatrixCsvDataExtractor() {
+		super(10);
+	}
 
-  @Override
-  protected int getLabelIndex(String[] csvAttributes) {
-    return Integer.parseInt(csvAttributes[0]);
-  }
+	@Override
+	protected int getLabelIndex(String[] csvAttributes) {
+		return Integer.parseInt(csvAttributes[0]);
+	}
 }

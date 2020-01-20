@@ -21,16 +21,15 @@ import org.ml4j.util.NumericFeaturesMatrixCsvDataExtractor;
  * 
  * @author Michael Lavelle
  */
-public class KagglePixelFeaturesMatrixCsvDataExtractor 
-    extends NumericFeaturesMatrixCsvDataExtractor {
+public class KagglePixelFeaturesMatrixCsvDataExtractor extends NumericFeaturesMatrixCsvDataExtractor {
 
-  @Override
-  public double[] createData(String[] csvAttributes) {
-    double[] rawData = super.createData(csvAttributes);
-    double[] pixelActivationData = new double[rawData.length - 1];
-    for (int i = 0; i < pixelActivationData.length; i++) {
-      pixelActivationData[i] = rawData[i + 1] == 0 ? 0 : 1;
-    }
-    return pixelActivationData;
-  }
+	@Override
+	public double[] createData(String[] csvAttributes) {
+		double[] rawData = super.createData(csvAttributes);
+		double[] pixelActivationData = new double[rawData.length - 1];
+		for (int i = 0; i < pixelActivationData.length; i++) {
+			pixelActivationData[i] = rawData[i + 1] == 0 ? 0 : 1;
+		}
+		return pixelActivationData;
+	}
 }
