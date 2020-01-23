@@ -37,8 +37,8 @@ import org.ml4j.nn.layers.FullyConnectedFeedForwardLayerImpl;
 import org.ml4j.nn.neurons.Neurons;
 import org.ml4j.nn.neurons.Neurons3D;
 import org.ml4j.nn.neurons.NeuronsActivation;
-import org.ml4j.nn.neurons.NeuronsActivationFeatureOrientation;
 import org.ml4j.nn.neurons.NeuronsActivationImpl;
+import org.ml4j.nn.neurons.format.NeuronsActivationFormat;
 import org.ml4j.nn.supervised.FeedForwardNeuralNetworkContextImpl;
 import org.ml4j.nn.supervised.SupervisedFeedForwardNeuralNetwork;
 import org.ml4j.nn.supervised.SupervisedFeedForwardNeuralNetworkImpl;
@@ -98,7 +98,7 @@ public class ClassifierDemo
             new PixelFeaturesMatrixCsvDataExtractor(), 0, 1000));
     
     return new NeuronsActivationImpl(new Neurons(trainingDataMatrix[0].length, false), matrixFactory.createMatrixFromRows(trainingDataMatrix).transpose(),
-        NeuronsActivationFeatureOrientation.ROWS_SPAN_FEATURE_SET);
+        NeuronsActivationFormat.ROWS_SPAN_FEATURE_SET, true);
   }
   
   private float[][] toFloatArray(double[][] data) {
@@ -122,7 +122,7 @@ public class ClassifierDemo
         new PixelFeaturesMatrixCsvDataExtractor(), 1000, 2000));
 
     return new NeuronsActivationImpl(new Neurons(testDataMatrix[0].length, false), matrixFactory.createMatrixFromRows(testDataMatrix).transpose(),
-        NeuronsActivationFeatureOrientation.ROWS_SPAN_FEATURE_SET);
+    		NeuronsActivationFormat.ROWS_SPAN_FEATURE_SET, true);
   }
 
   @Override
@@ -226,7 +226,7 @@ public class ClassifierDemo
       Matrix activations = testDataInputActivations.getActivations(matrixFactory).getColumn(i);
       
       NeuronsActivation orignalActivation = new NeuronsActivationImpl(new Neurons(activations.getRows(), false), activations,
-          NeuronsActivationFeatureOrientation.ROWS_SPAN_FEATURE_SET);
+    		  NeuronsActivationFormat.ROWS_SPAN_FEATURE_SET);
 
       MnistUtils.draw(orignalActivation.getActivations(matrixFactory).getRowByRowArray(), display);
 
@@ -266,7 +266,7 @@ public class ClassifierDemo
         new SingleDigitLabelsMatrixCsvDataExtractor(), 0, 1000));
    
     return new NeuronsActivationImpl(new Neurons(testDataMatrix[0].length, false), matrixFactory.createMatrixFromRows(testDataMatrix).transpose(),
-        NeuronsActivationFeatureOrientation.ROWS_SPAN_FEATURE_SET);
+    		NeuronsActivationFormat.ROWS_SPAN_FEATURE_SET, true);
   }
 
   @Override
@@ -278,6 +278,6 @@ public class ClassifierDemo
         new SingleDigitLabelsMatrixCsvDataExtractor(), 1000, 2000));
    
     return new NeuronsActivationImpl(new Neurons(testDataMatrix[0].length, false), matrixFactory.createMatrixFromRows(testDataMatrix).transpose(),
-        NeuronsActivationFeatureOrientation.ROWS_SPAN_FEATURE_SET);
+    		NeuronsActivationFormat.ROWS_SPAN_FEATURE_SET, true);
   }
 }

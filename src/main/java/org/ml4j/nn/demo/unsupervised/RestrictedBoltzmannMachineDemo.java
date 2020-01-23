@@ -32,8 +32,8 @@ import org.ml4j.nn.layers.UndirectedLayerContextImpl;
 import org.ml4j.nn.neurons.Neurons;
 import org.ml4j.nn.neurons.Neurons3D;
 import org.ml4j.nn.neurons.NeuronsActivation;
-import org.ml4j.nn.neurons.NeuronsActivationFeatureOrientation;
 import org.ml4j.nn.neurons.NeuronsActivationImpl;
+import org.ml4j.nn.neurons.format.NeuronsActivationFormat;
 import org.ml4j.nn.unsupervised.RestrictedBoltzmannMachine;
 import org.ml4j.nn.unsupervised.RestrictedBoltzmannMachineContext;
 import org.ml4j.nn.unsupervised.RestrictedBoltzmannMachineContextImpl;
@@ -119,7 +119,7 @@ public class RestrictedBoltzmannMachineDemo extends
         new PixelFeaturesMatrixCsvDataExtractor(), 0, 1000));
 
     return new NeuronsActivationImpl(new Neurons(trainingDataMatrix[0].length, false), matrixFactory.createMatrixFromRows(trainingDataMatrix).transpose(),
-        NeuronsActivationFeatureOrientation.ROWS_SPAN_FEATURE_SET);
+    		NeuronsActivationFormat.ROWS_SPAN_FEATURE_SET, true);
   }
 
   @Override
@@ -133,7 +133,7 @@ public class RestrictedBoltzmannMachineDemo extends
         new PixelFeaturesMatrixCsvDataExtractor(), 1000, 2000));
 
     return new NeuronsActivationImpl(new Neurons(testDataMatrix[0].length, false), matrixFactory.createMatrixFromRows(testDataMatrix).transpose(),
-        NeuronsActivationFeatureOrientation.ROWS_SPAN_FEATURE_SET);
+    		NeuronsActivationFormat.ROWS_SPAN_FEATURE_SET, true);
   }
 
   @Override
@@ -195,7 +195,7 @@ public class RestrictedBoltzmannMachineDemo extends
       RestrictedBoltzmannSamplingActivation samplingResult =
           restrictedBoltzmannMachine.performGibbsSampling(
               new NeuronsActivationImpl(new Neurons(visibleActivations.getRows(), false), visibleActivations,
-                  NeuronsActivationFeatureOrientation.ROWS_SPAN_FEATURE_SET),
+            		  NeuronsActivationFormat.ROWS_SPAN_FEATURE_SET),
               500, samplingContext);
 
       NeuronsActivation finalReconstruction = samplingResult

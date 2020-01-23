@@ -42,8 +42,9 @@ import org.ml4j.nn.layers.MaxPoolingFeedForwardLayerImpl;
 import org.ml4j.nn.neurons.Neurons;
 import org.ml4j.nn.neurons.Neurons3D;
 import org.ml4j.nn.neurons.NeuronsActivation;
-import org.ml4j.nn.neurons.NeuronsActivationFeatureOrientation;
 import org.ml4j.nn.neurons.NeuronsActivationImpl;
+import org.ml4j.nn.neurons.format.ImageNeuronsActivationFormat;
+import org.ml4j.nn.neurons.format.NeuronsActivationFormat;
 import org.ml4j.nn.supervised.LayeredFeedForwardNeuralNetworkContextImpl;
 import org.ml4j.nn.supervised.LayeredSupervisedFeedForwardNeuralNetwork;
 import org.ml4j.nn.supervised.LayeredSupervisedFeedForwardNeuralNetworkImpl;
@@ -157,7 +158,7 @@ public class PretrainedKaggleCompetionClassifierDemo
             new KagglePixelFeaturesMatrixCsvDataExtractor(), 1, 1001));
     
     NeuronsActivation act = new NeuronsActivationImpl(new Neurons(trainingDataMatrix[0].length, false), matrixFactory.createMatrixFromRows(trainingDataMatrix).transpose(),
-        NeuronsActivationFeatureOrientation.ROWS_SPAN_FEATURE_SET);
+    		ImageNeuronsActivationFormat.ML4J_DEFAULT_IMAGE_FORMAT, true);
     
     return act;
     
@@ -175,7 +176,7 @@ public class PretrainedKaggleCompetionClassifierDemo
         new KagglePixelFeaturesMatrixCsvDataExtractor(), 1001, 2001));
 
     return new NeuronsActivationImpl(new Neurons(testDataMatrix[0].length, false),  matrixFactory.createMatrixFromRows(testDataMatrix).transpose(),
-        NeuronsActivationFeatureOrientation.ROWS_SPAN_FEATURE_SET);
+    		ImageNeuronsActivationFormat.ML4J_DEFAULT_IMAGE_FORMAT, true);
   }
 
   @Override
@@ -263,7 +264,7 @@ public class PretrainedKaggleCompetionClassifierDemo
       Matrix activations = testDataInputActivations.getActivations(matrixFactory).getColumn(i);
       
       NeuronsActivation orignalActivation = new NeuronsActivationImpl(new Neurons(activations.getRows(), false), activations,
-          NeuronsActivationFeatureOrientation.ROWS_SPAN_FEATURE_SET);
+    		  testDataInputActivations.getFormat());
 
       KaggleMnistUtils.draw(orignalActivation.getActivations(matrixFactory).toColumnByColumnArray(), display);
 
@@ -303,7 +304,7 @@ public class PretrainedKaggleCompetionClassifierDemo
         new SingleDigitLabelsMatrixCsvDataExtractor(), 1, 1001));
    
     return new NeuronsActivationImpl(new Neurons(testDataMatrix[0].length, false), matrixFactory.createMatrixFromRows(testDataMatrix).transpose(),
-        NeuronsActivationFeatureOrientation.ROWS_SPAN_FEATURE_SET);
+    		NeuronsActivationFormat.ROWS_SPAN_FEATURE_SET, true);
   }
 
   @Override
@@ -315,7 +316,7 @@ public class PretrainedKaggleCompetionClassifierDemo
         new SingleDigitLabelsMatrixCsvDataExtractor(), 1001, 2001));
    
     return new NeuronsActivationImpl(new Neurons(testDataMatrix[0].length, false), matrixFactory.createMatrixFromRows(testDataMatrix).transpose(),
-        NeuronsActivationFeatureOrientation.ROWS_SPAN_FEATURE_SET);
+    		NeuronsActivationFormat.ROWS_SPAN_FEATURE_SET, true);
   }
 
 
