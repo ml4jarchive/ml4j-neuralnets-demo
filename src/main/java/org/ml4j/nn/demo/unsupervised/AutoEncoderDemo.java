@@ -34,8 +34,8 @@ import org.ml4j.nn.layers.FullyConnectedFeedForwardLayerImpl;
 import org.ml4j.nn.neurons.Neurons;
 import org.ml4j.nn.neurons.Neurons3D;
 import org.ml4j.nn.neurons.NeuronsActivation;
-import org.ml4j.nn.neurons.NeuronsActivationFeatureOrientation;
 import org.ml4j.nn.neurons.NeuronsActivationImpl;
+import org.ml4j.nn.neurons.format.NeuronsActivationFormat;
 import org.ml4j.nn.unsupervised.AutoEncoder;
 import org.ml4j.nn.unsupervised.AutoEncoderContext;
 import org.ml4j.nn.unsupervised.AutoEncoderContextImpl;
@@ -95,7 +95,7 @@ public class AutoEncoderDemo
             new PixelFeaturesMatrixCsvDataExtractor(), 0, 500));
     
     return new NeuronsActivationImpl(new Neurons(trainingDataMatrix[0].length, false), matrixFactory.createMatrixFromRows(trainingDataMatrix).transpose(),
-        NeuronsActivationFeatureOrientation.ROWS_SPAN_FEATURE_SET);
+    		NeuronsActivationFormat.ROWS_SPAN_FEATURE_SET, true);
   }
 
   @Override
@@ -109,7 +109,7 @@ public class AutoEncoderDemo
         new PixelFeaturesMatrixCsvDataExtractor(), 1000, 2000));
 
     return new NeuronsActivationImpl(new Neurons(testDataMatrix[0].length, false), matrixFactory.createMatrixFromRows(testDataMatrix).transpose(),
-        NeuronsActivationFeatureOrientation.ROWS_SPAN_FEATURE_SET);
+    		NeuronsActivationFormat.ROWS_SPAN_FEATURE_SET, true);
   }
   
   private float[][] toFloatArray(double[][] data) {
@@ -180,7 +180,9 @@ public class AutoEncoderDemo
       Matrix activations = testDataInputActivations.getActivations(matrixFactory).getColumn(i);
       
       NeuronsActivation orignalActivation = new NeuronsActivationImpl(new Neurons(activations.getRows(), false), activations,
-          NeuronsActivationFeatureOrientation.ROWS_SPAN_FEATURE_SET);
+    		  NeuronsActivationFormat.ROWS_SPAN_FEATURE_SET);
+      
+      int featureCount = orignalActivation.getFeatureCount();
 
       MnistUtils.draw(orignalActivation.getActivations(matrixFactory).getRowByRowArray(), display);
 
@@ -189,7 +191,7 @@ public class AutoEncoderDemo
 
       NeuronsActivation encodedFeatures = autoEncoder.encode(orignalActivation, encodingContext);
 
-      LOGGER.info("Encoded a single image from " + orignalActivation.getFeatureCount() 
+      LOGGER.info("Encoded a single image from " + featureCount 
           + " pixels to " + encodedFeatures.getFeatureCount() + " features");
       
       Thread.sleep(1000);
