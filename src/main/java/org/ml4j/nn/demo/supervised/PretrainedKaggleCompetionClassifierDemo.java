@@ -116,7 +116,7 @@ public class PretrainedKaggleCompetionClassifierDemo
     // Construct a Neural Network in the same shape as our Kaggle entry.
     // Initialise each trainable layer with our pre-trained weights.
     
-    FeedForwardLayer<?, ?> firstLayer = new ConvolutionalFeedForwardLayerImpl(
+    FeedForwardLayer<?, ?> firstLayer = new ConvolutionalFeedForwardLayerImpl("FirstLayer",
         directedComponentFactory, axonsFactory, new Neurons3D(28, 28 ,1, true), new Neurons3D(20, 20, 6, false), 
         new DefaultSigmoidActivationFunctionImpl(), matrixFactory, layer1Weights, layer1Biases, false);
             
@@ -125,26 +125,26 @@ public class PretrainedKaggleCompetionClassifierDemo
     // 4.   Here we set the "scaleOutputs" property to true to account for this
     // legacy situation.  Normally we would set this property to false
     FeedForwardLayer<?, ?> secondLayer = 
-        new MaxPoolingFeedForwardLayerImpl(directedComponentFactory, axonsFactory, differentiableActivationFunctionFactory, new Neurons3D(20, 20, 6, false), 
+        new MaxPoolingFeedForwardLayerImpl("SecondLayer", directedComponentFactory, axonsFactory, differentiableActivationFunctionFactory, new Neurons3D(20, 20, 6, false), 
             new Neurons3D(10, 10, 6, false), matrixFactory, true, false, 2);
    
     FeedForwardLayer<?, ?> thirdLayer = 
-        new FullyConnectedFeedForwardLayerImpl(directedComponentFactory, axonsFactory, new Neurons3D(10, 10, 6, true), 
+        new FullyConnectedFeedForwardLayerImpl("ThirdLayer",directedComponentFactory, axonsFactory, new Neurons3D(10, 10, 6, true), 
             new Neurons3D(5, 5, 16, false), new DefaultSigmoidActivationFunctionImpl(), 
             matrixFactory, layer3Weights, layer3Biases, false);
     
-    FeedForwardLayer<?, ?> forthLayer = 
-        new FullyConnectedFeedForwardLayerImpl(directedComponentFactory, axonsFactory, new Neurons(400, true), 
+    FeedForwardLayer<?, ?> fourthLayer = 
+        new FullyConnectedFeedForwardLayerImpl("FourthLayer", directedComponentFactory, axonsFactory, new Neurons(400, true), 
         new Neurons(100, false), new DefaultSigmoidActivationFunctionImpl(), matrixFactory,
         layer4Weights, layer4Biases, false);
     
     FeedForwardLayer<?, ?> fifthLayer = 
-        new FullyConnectedFeedForwardLayerImpl(directedComponentFactory, axonsFactory, new Neurons(100, true), 
+        new FullyConnectedFeedForwardLayerImpl("FifthLayer", directedComponentFactory, axonsFactory, new Neurons(100, true), 
         new Neurons(10, false), new DefaultSoftmaxActivationFunctionImpl(), matrixFactory,
         layer5Weights, layer5Biases, false);
 
-    return new LayeredSupervisedFeedForwardNeuralNetworkImpl(directedComponentFactory, Arrays.asList(firstLayer, secondLayer,
-        thirdLayer, forthLayer, fifthLayer));
+    return new LayeredSupervisedFeedForwardNeuralNetworkImpl("NeuralNetwork", directedComponentFactory, Arrays.asList(firstLayer, secondLayer,
+        thirdLayer, fourthLayer, fifthLayer));
   }
 
   @Override

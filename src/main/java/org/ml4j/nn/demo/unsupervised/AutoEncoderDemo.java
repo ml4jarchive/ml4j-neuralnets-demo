@@ -73,15 +73,15 @@ public class AutoEncoderDemo
     
     DirectedComponentFactory directedComponentFactory = new DefaultDirectedComponentFactoryImpl(matrixFactory, axonsFactory, activationFunctionFactory);
     
-    FeedForwardLayer<?, ?> encodingLayer = new FullyConnectedFeedForwardLayerImpl(directedComponentFactory, 
+    FeedForwardLayer<?, ?> encodingLayer = new FullyConnectedFeedForwardLayerImpl("EncodingLayer", directedComponentFactory, 
         axonsFactory, new Neurons3D(28, 28 ,1, true), new Neurons(200, false), 
         new DefaultSigmoidActivationFunctionImpl(), matrixFactory, false);
     
     FeedForwardLayer<?, ?> decodingLayer = 
-        new FullyConnectedFeedForwardLayerImpl(directedComponentFactory, axonsFactory, new Neurons(200, true), 
+        new FullyConnectedFeedForwardLayerImpl("DecodingLayer", directedComponentFactory, axonsFactory, new Neurons(200, true), 
         new Neurons3D(28, 28 ,1, false), new DefaultSigmoidActivationFunctionImpl(), matrixFactory, false);
 
-    return new AutoEncoderImpl(directedComponentFactory, encodingLayer, decodingLayer);
+    return new AutoEncoderImpl("AutoEncoder", directedComponentFactory, encodingLayer, decodingLayer);
   }
 
   @Override
