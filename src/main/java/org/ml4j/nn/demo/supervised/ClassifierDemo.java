@@ -76,15 +76,15 @@ public class ClassifierDemo
     
     DirectedComponentFactory directedComponentFactory = new DefaultDirectedComponentFactoryImpl(matrixFactory, axonsFactory, activationFunctionFactory);
     
-    FeedForwardLayer<?, ?> firstLayer = new FullyConnectedFeedForwardLayerImpl(directedComponentFactory, 
+    FeedForwardLayer<?, ?> firstLayer = new FullyConnectedFeedForwardLayerImpl("FirstLayer", directedComponentFactory, 
         axonsFactory, new Neurons3D(28, 28 ,1, true), new Neurons3D(20, 20, 1, false), 
         new DefaultSigmoidActivationFunctionImpl(), matrixFactory, false);
     
     FeedForwardLayer<?, ?> secondLayer = 
-        new FullyConnectedFeedForwardLayerImpl(directedComponentFactory, axonsFactory, new Neurons3D(20, 20, 1, true), 
+        new FullyConnectedFeedForwardLayerImpl("SecondLayer", directedComponentFactory, axonsFactory, new Neurons3D(20, 20, 1, true), 
         new Neurons(10, false), new DefaultSoftmaxActivationFunctionImpl(), matrixFactory, false);
 
-    return new SupervisedFeedForwardNeuralNetworkImpl(directedComponentFactory, firstLayer, secondLayer);
+    return new SupervisedFeedForwardNeuralNetworkImpl("NeuralNetwork", directedComponentFactory, firstLayer, secondLayer);
   }
 
   @Override
