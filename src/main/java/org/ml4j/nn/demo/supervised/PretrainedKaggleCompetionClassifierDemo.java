@@ -19,12 +19,18 @@ import java.util.Arrays;
 import org.ml4j.Matrix;
 import org.ml4j.MatrixFactory;
 import org.ml4j.imaging.targets.ImageDisplay;
-import org.ml4j.jblas.JBlasRowMajorMatrixFactory;
+import org.ml4j.jblas.JBlasRowMajorMatrixFactoryOptimised;
 import org.ml4j.nn.ForwardPropagation;
 import org.ml4j.nn.LayeredFeedForwardNeuralNetworkContext;
 import org.ml4j.nn.activationfunctions.DefaultSigmoidActivationFunctionImpl;
 import org.ml4j.nn.activationfunctions.DefaultSoftmaxActivationFunctionImpl;
 import org.ml4j.nn.activationfunctions.factories.DifferentiableActivationFunctionFactory;
+import org.ml4j.nn.axons.BiasMatrix;
+import org.ml4j.nn.axons.BiasMatrixImpl;
+import org.ml4j.nn.axons.WeightsFormatImpl;
+import org.ml4j.nn.axons.WeightsMatrix;
+import org.ml4j.nn.axons.WeightsMatrixImpl;
+import org.ml4j.nn.axons.WeightsMatrixOrientation;
 import org.ml4j.nn.axons.factories.AxonsFactory;
 import org.ml4j.nn.components.factories.DirectedComponentFactory;
 import org.ml4j.nn.demo.base.supervised.SupervisedNeuralNetworkDemoBase;
@@ -45,6 +51,7 @@ import org.ml4j.nn.neurons.NeuronsActivation;
 import org.ml4j.nn.neurons.NeuronsActivationImpl;
 import org.ml4j.nn.neurons.format.ImageNeuronsActivationFormat;
 import org.ml4j.nn.neurons.format.NeuronsActivationFormat;
+import org.ml4j.nn.neurons.format.features.Dimension;
 import org.ml4j.nn.supervised.LayeredFeedForwardNeuralNetworkContextImpl;
 import org.ml4j.nn.supervised.LayeredSupervisedFeedForwardNeuralNetwork;
 import org.ml4j.nn.supervised.LayeredSupervisedFeedForwardNeuralNetworkImpl;
@@ -101,18 +108,41 @@ public class PretrainedKaggleCompetionClassifierDemo
     SerializationHelper helper = new SerializationHelper(
         PretrainedKaggleCompetionClassifierDemo.class.getClassLoader(), "pretrainedweights");
 
-    Matrix layer1Weights = matrixFactory.createMatrixFromRowsByRowsArray(6, 81, helper.deserialize(float[].class, "layer1Weights"));
-    Matrix layer1Biases = matrixFactory.createMatrixFromRowsByRowsArray(6, 1,  helper.deserialize(float[].class, "layer1Biases"));
+		WeightsMatrix layer1Weights = new WeightsMatrixImpl(
+				matrixFactory.createMatrixFromRowsByRowsArray(6, 81,
+						helper.deserialize(float[].class, "layer1Weights")),
+				new WeightsFormatImpl(
+						Arrays.asList(Dimension.INPUT_DEPTH, Dimension.FILTER_HEIGHT, Dimension.FILTER_WIDTH),
+						Arrays.asList(Dimension.OUTPUT_DEPTH), WeightsMatrixOrientation.ROWS_SPAN_OUTPUT_DIMENSIONS));
 
-    Matrix layer3Weights = matrixFactory.createMatrixFromRowsByRowsArray(400, 600, helper.deserialize(float[].class, "layer3Weights"));
-    Matrix layer3Biases = matrixFactory.createMatrixFromRowsByRowsArray(400, 1,  helper.deserialize(float[].class, "layer3Biases"));
+		BiasMatrix layer1Biases = new BiasMatrixImpl(
+				matrixFactory.createMatrixFromRowsByRowsArray(6, 1, helper.deserialize(float[].class, "layer1Biases")));
 
-    Matrix layer4Weights = matrixFactory.createMatrixFromRowsByRowsArray(100, 400, helper.deserialize(float[].class, "layer4Weights"));
-    Matrix layer4Biases = matrixFactory.createMatrixFromRowsByRowsArray(100, 1,  helper.deserialize(float[].class, "layer4Biases"));
-    
-    Matrix layer5Weights = matrixFactory.createMatrixFromRowsByRowsArray(10, 100, helper.deserialize(float[].class, "layer5Weights"));
-    Matrix layer5Biases = matrixFactory.createMatrixFromRowsByRowsArray(10, 1,  helper.deserialize(float[].class, "layer5Biases"));
-    
+		WeightsMatrix layer3Weights = new WeightsMatrixImpl(
+				matrixFactory.createMatrixFromRowsByRowsArray(400, 600,
+						helper.deserialize(float[].class, "layer3Weights")),
+				new WeightsFormatImpl(Arrays.asList(Dimension.INPUT_FEATURE), Arrays.asList(Dimension.OUTPUT_FEATURE), WeightsMatrixOrientation.ROWS_SPAN_OUTPUT_DIMENSIONS));
+
+		BiasMatrix layer3Biases = new BiasMatrixImpl(matrixFactory.createMatrixFromRowsByRowsArray(400, 1,
+				helper.deserialize(float[].class, "layer3Biases")));
+
+		WeightsMatrix layer4Weights = new WeightsMatrixImpl(
+				matrixFactory.createMatrixFromRowsByRowsArray(100, 400,
+						helper.deserialize(float[].class, "layer4Weights")),
+				new WeightsFormatImpl(Arrays.asList(Dimension.INPUT_FEATURE), Arrays.asList(Dimension.OUTPUT_FEATURE), 
+						WeightsMatrixOrientation.ROWS_SPAN_OUTPUT_DIMENSIONS));
+
+		BiasMatrix layer4Biases = new BiasMatrixImpl(matrixFactory.createMatrixFromRowsByRowsArray(100, 1,
+				helper.deserialize(float[].class, "layer4Biases")));
+
+		WeightsMatrix layer5Weights = new WeightsMatrixImpl(
+				matrixFactory.createMatrixFromRowsByRowsArray(10, 100,
+						helper.deserialize(float[].class, "layer5Weights")),
+				new WeightsFormatImpl(Arrays.asList(Dimension.INPUT_FEATURE), Arrays.asList(Dimension.OUTPUT_FEATURE), WeightsMatrixOrientation.ROWS_SPAN_OUTPUT_DIMENSIONS));
+
+		BiasMatrix layer5Biases = new BiasMatrixImpl(matrixFactory.createMatrixFromRowsByRowsArray(10, 1,
+				helper.deserialize(float[].class, "layer5Biases")));
+
     // Construct a Neural Network in the same shape as our Kaggle entry.
     // Initialise each trainable layer with our pre-trained weights.
     
@@ -182,7 +212,7 @@ public class PretrainedKaggleCompetionClassifierDemo
   @Override
   protected MatrixFactory createMatrixFactory() {
     LOGGER.trace("Creating MatrixFactory");
-    return new JBlasRowMajorMatrixFactory();
+    return new JBlasRowMajorMatrixFactoryOptimised();
   }
 
   
