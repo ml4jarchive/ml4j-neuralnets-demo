@@ -20,6 +20,7 @@ import org.ml4j.imaging.targets.ImageDisplay;
 import org.ml4j.jblas.JBlasRowMajorMatrixFactory;
 import org.ml4j.nn.activationfunctions.DefaultSigmoidActivationFunctionImpl;
 import org.ml4j.nn.activationfunctions.factories.DifferentiableActivationFunctionFactory;
+import org.ml4j.nn.axons.AxonsConfig;
 import org.ml4j.nn.axons.factories.AxonsFactory;
 import org.ml4j.nn.components.factories.DirectedComponentFactory;
 import org.ml4j.nn.demo.base.unsupervised.UnsupervisedNeuralNetworkDemoBase;
@@ -74,12 +75,12 @@ public class AutoEncoderDemo
     DirectedComponentFactory directedComponentFactory = new DefaultDirectedComponentFactoryImpl(matrixFactory, axonsFactory, activationFunctionFactory);
     
     FeedForwardLayer<?, ?> encodingLayer = new FullyConnectedFeedForwardLayerImpl("EncodingLayer", directedComponentFactory, 
-        axonsFactory, new Neurons3D(28, 28 ,1, true), new Neurons(200, false), 
-        new DefaultSigmoidActivationFunctionImpl(), matrixFactory, false);
+        axonsFactory, new AxonsConfig<>(new Neurons3D(28, 28 ,1, true), new Neurons(200, false)), 
+        new DefaultSigmoidActivationFunctionImpl(), null);
     
     FeedForwardLayer<?, ?> decodingLayer = 
-        new FullyConnectedFeedForwardLayerImpl("DecodingLayer", directedComponentFactory, axonsFactory, new Neurons(200, true), 
-        new Neurons3D(28, 28 ,1, false), new DefaultSigmoidActivationFunctionImpl(), matrixFactory, false);
+        new FullyConnectedFeedForwardLayerImpl("DecodingLayer", directedComponentFactory, axonsFactory, new AxonsConfig<>(new Neurons(200, true), 
+        new Neurons3D(28, 28 ,1, false)), new DefaultSigmoidActivationFunctionImpl(), null);
 
     return new AutoEncoderImpl("AutoEncoder", directedComponentFactory, encodingLayer, decodingLayer);
   }
