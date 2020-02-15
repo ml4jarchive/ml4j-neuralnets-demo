@@ -23,11 +23,7 @@ import org.ml4j.jblas.JBlasRowMajorMatrixFactoryOptimised;
 import org.ml4j.nn.ForwardPropagation;
 import org.ml4j.nn.LayeredFeedForwardNeuralNetworkContext;
 import org.ml4j.nn.activationfunctions.ActivationFunctionBaseType;
-import org.ml4j.nn.activationfunctions.ActivationFunctionProperties;
-import org.ml4j.nn.activationfunctions.ActivationFunctionType;
 import org.ml4j.nn.activationfunctions.factories.DifferentiableActivationFunctionFactory;
-import org.ml4j.nn.axons.Axons3DConfig;
-import org.ml4j.nn.axons.AxonsConfig;
 import org.ml4j.nn.axons.BiasMatrix;
 import org.ml4j.nn.axons.BiasMatrixImpl;
 import org.ml4j.nn.axons.WeightsFormatImpl;
@@ -46,7 +42,6 @@ import org.ml4j.nn.factories.DefaultDirectedComponentFactoryImpl;
 import org.ml4j.nn.layers.DefaultDirectedLayerFactory;
 import org.ml4j.nn.layers.DirectedLayerContext;
 import org.ml4j.nn.layers.DirectedLayerFactory;
-import org.ml4j.nn.layers.FeedForwardLayer;
 import org.ml4j.nn.neurons.Neurons;
 import org.ml4j.nn.neurons.Neurons3D;
 import org.ml4j.nn.neurons.NeuronsActivation;
@@ -54,9 +49,14 @@ import org.ml4j.nn.neurons.NeuronsActivationImpl;
 import org.ml4j.nn.neurons.format.ImageNeuronsActivationFormat;
 import org.ml4j.nn.neurons.format.NeuronsActivationFormat;
 import org.ml4j.nn.neurons.format.features.Dimension;
+import org.ml4j.nn.sessions.factories.DefaultSessionFactory;
+import org.ml4j.nn.sessions.factories.DefaultSessionFactoryImpl;
+import org.ml4j.nn.supervised.DefaultLayeredSupervisedFeedForwardNeuralNetworkFactory;
+import org.ml4j.nn.supervised.DefaultSupervisedFeedForwardNeuralNetworkFactory;
 import org.ml4j.nn.supervised.LayeredFeedForwardNeuralNetworkContextImpl;
 import org.ml4j.nn.supervised.LayeredSupervisedFeedForwardNeuralNetwork;
-import org.ml4j.nn.supervised.LayeredSupervisedFeedForwardNeuralNetworkImpl;
+import org.ml4j.nn.supervised.LayeredSupervisedFeedForwardNeuralNetworkFactory;
+import org.ml4j.nn.supervised.SupervisedFeedForwardNeuralNetworkFactory;
 import org.ml4j.util.DoubleArrayMatrixLoader;
 import org.ml4j.util.SerializationHelper;
 import org.slf4j.Logger;
@@ -150,43 +150,50 @@ public class PretrainedKaggleCompetionClassifierDemo
 
     // Construct a Neural Network in the same shape as our Kaggle entry.
     // Initialise each trainable layer with our pre-trained weights.
-    
 		
-	FeedForwardLayer<?, ?> firstLayer = layerFactory.createConvolutionalFeedForwardLayer("FirstLayer", 
-			new Axons3DConfig(new Neurons3D(28, 28 ,1, true), new Neurons3D(20, 20, 6, false)), 
-			layer1Weights, layer1Biases, 
-			ActivationFunctionType.getBaseType(ActivationFunctionBaseType.SIGMOID), new ActivationFunctionProperties(), null);
+	SupervisedFeedForwardNeuralNetworkFactory neuralNetworkFactory = 
+			new DefaultSupervisedFeedForwardNeuralNetworkFactory(directedComponentFactory);
 	
-    // The max pooling layer that this NN was trained with originally was a legacy
-    // implementation which scaled up the output activations by a factor of
-    // 4.   Here we set the "scaleOutputs" property to true to account for this
-    // legacy situation.  Normally we would set this property to false
-	FeedForwardLayer<?, ?> secondLayer = layerFactory.createMaxPoolingFeedForwardLayer("SecondLayer", 
-			new Axons3DConfig(new Neurons3D(20, 20, 6, false), 
-            new Neurons3D(10, 10, 6, false)).withStrideHeight(2).withStrideWidth(2), 
-			true);
-	
-	FeedForwardLayer<?, ?> thirdLayer = layerFactory
-			.createFullyConnectedFeedForwardLayer("ThirdLayer", 
-					new AxonsConfig<>( new Neurons3D(10, 10, 6, true), 
-		            new Neurons3D(5, 5, 16, false)), layer3Weights, layer3Biases, 
-					ActivationFunctionType.getBaseType(ActivationFunctionBaseType.SIGMOID), new ActivationFunctionProperties(), null);
-	 
-    FeedForwardLayer<?, ?> fourthLayer = layerFactory
-			.createFullyConnectedFeedForwardLayer("FourthLayer", 
-					new AxonsConfig<>( new Neurons(400, true), 
-					        new Neurons(100, false)), layer4Weights, layer4Biases, 
-					ActivationFunctionType.getBaseType(ActivationFunctionBaseType.SIGMOID), new ActivationFunctionProperties(), null);
-	 
-    FeedForwardLayer<?, ?> fifthLayer = layerFactory
-			.createFullyConnectedFeedForwardLayer("FifthLayer", 
-					new AxonsConfig<>( new Neurons(100, true), 
-					        new Neurons(10, false)), layer5Weights, layer5Biases, 
-					ActivationFunctionType.getBaseType(ActivationFunctionBaseType.SOFTMAX), new ActivationFunctionProperties(), null);
-	 
+	LayeredSupervisedFeedForwardNeuralNetworkFactory layredNeuralNetworkFactory = 
+			new DefaultLayeredSupervisedFeedForwardNeuralNetworkFactory(directedComponentFactory);
+		
+	DefaultSessionFactory sessionFactory = 	new DefaultSessionFactoryImpl(matrixFactory, directedComponentFactory, layerFactory, neuralNetworkFactory, layredNeuralNetworkFactory);	
+    
+	return sessionFactory.createSession().buildNeuralNetwork("mnist")
+		.withConvolutionalLayer("FirstLayer")
+			.withInputNeurons(new Neurons3D(28, 28 ,1, true))
+			.withWeightsMatrix(layer1Weights)
+			.withBiasMatrix(layer1Biases)
+			.withOutputNeurons(new Neurons3D(20, 20, 6, false))
+			.withActivationFunction(ActivationFunctionBaseType.SIGMOID)
+		.withMaxPoolingLayer("SecondLayer")
+		.withInputNeurons(new Neurons3D(20, 20, 6, false))
+		//  The max pooling layer that this NN was trained with originally was a legacy
+		//  implementation which scaled up the output activations by a factor of
+		//  4.  This scaleOutputs configuration is usually not required   
+		.withScaleOutputs()
+		.withConfig(config -> config.withStrideHeight(2).withStrideWidth(2)
+				.withOutputNeurons(new Neurons3D(10, 10, 6, false)))
+		.withFullyConnectedLayer("ThirdLayer")
+			.withInputNeurons(new Neurons3D(10, 10, 6, true))
+			.withWeightsMatrix(layer3Weights)
+			.withBiasMatrix(layer3Biases)
+			.withOutputNeurons(new Neurons3D(5, 5, 16, false))
+			.withActivationFunction(ActivationFunctionBaseType.SIGMOID)
+		.withFullyConnectedLayer("FourthLayer")
+			.withInputNeurons(new Neurons(400, true))
+			.withWeightsMatrix(layer4Weights)
+			.withBiasMatrix(layer4Biases)
+			.withOutputNeurons(new Neurons(100, false))
+			.withActivationFunction(ActivationFunctionBaseType.SIGMOID)
+		.withFullyConnectedLayer("FifthLayer")
+			.withInputNeurons(new Neurons(100, true))
+			.withWeightsMatrix(layer5Weights)
+			.withBiasMatrix(layer5Biases)
+			.withOutputNeurons(new Neurons(10, false))
+			.withActivationFunction(ActivationFunctionBaseType.SOFTMAX)
+		.buildLayeredNeuralNetwork();
 
-    return new LayeredSupervisedFeedForwardNeuralNetworkImpl("NeuralNetwork", directedComponentFactory, Arrays.asList(firstLayer, secondLayer,
-        thirdLayer, fourthLayer, fifthLayer));
   }
 
   @Override
