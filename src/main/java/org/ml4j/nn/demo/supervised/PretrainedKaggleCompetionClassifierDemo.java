@@ -52,11 +52,9 @@ import org.ml4j.nn.neurons.format.features.Dimension;
 import org.ml4j.nn.sessions.factories.DefaultSessionFactory;
 import org.ml4j.nn.sessions.factories.DefaultSessionFactoryImpl;
 import org.ml4j.nn.supervised.DefaultLayeredSupervisedFeedForwardNeuralNetworkFactory;
-import org.ml4j.nn.supervised.DefaultSupervisedFeedForwardNeuralNetworkFactory;
 import org.ml4j.nn.supervised.LayeredFeedForwardNeuralNetworkContextImpl;
 import org.ml4j.nn.supervised.LayeredSupervisedFeedForwardNeuralNetwork;
 import org.ml4j.nn.supervised.LayeredSupervisedFeedForwardNeuralNetworkFactory;
-import org.ml4j.nn.supervised.SupervisedFeedForwardNeuralNetworkFactory;
 import org.ml4j.util.DoubleArrayMatrixLoader;
 import org.ml4j.util.SerializationHelper;
 import org.slf4j.Logger;
@@ -150,16 +148,13 @@ public class PretrainedKaggleCompetionClassifierDemo
 
     // Construct a Neural Network in the same shape as our Kaggle entry.
     // Initialise each trainable layer with our pre-trained weights.
-		
-	SupervisedFeedForwardNeuralNetworkFactory neuralNetworkFactory = 
-			new DefaultSupervisedFeedForwardNeuralNetworkFactory(directedComponentFactory);
 	
-	LayeredSupervisedFeedForwardNeuralNetworkFactory layredNeuralNetworkFactory = 
+	LayeredSupervisedFeedForwardNeuralNetworkFactory layeredNeuralNetworkFactory = 
 			new DefaultLayeredSupervisedFeedForwardNeuralNetworkFactory(directedComponentFactory);
 		
-	DefaultSessionFactory sessionFactory = 	new DefaultSessionFactoryImpl(matrixFactory, directedComponentFactory, layerFactory, neuralNetworkFactory, layredNeuralNetworkFactory);	
+	DefaultSessionFactory sessionFactory = 	new DefaultSessionFactoryImpl(matrixFactory, directedComponentFactory, layerFactory, layeredNeuralNetworkFactory);	
     
-	return sessionFactory.createSession().buildNeuralNetwork("mnist", new Neurons3D(28, 28, 1, false))
+	return sessionFactory.createSession().buildLayeredSupervised3DNeuralNetwork("mnist")
 		.withConvolutionalLayer("FirstLayer")
 			.withInputNeurons(new Neurons3D(28, 28 ,1, true))
 			.withWeightsMatrix(layer1Weights)
@@ -192,7 +187,7 @@ public class PretrainedKaggleCompetionClassifierDemo
 			.withBiasMatrix(layer5Biases)
 			.withOutputNeurons(new Neurons(10, false))
 			.withActivationFunction(ActivationFunctionBaseType.SOFTMAX)
-		.buildLayeredNeuralNetwork();
+		.build();
 
   }
 
