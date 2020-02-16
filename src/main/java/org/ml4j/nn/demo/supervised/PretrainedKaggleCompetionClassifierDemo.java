@@ -159,7 +159,7 @@ public class PretrainedKaggleCompetionClassifierDemo
 		
 	DefaultSessionFactory sessionFactory = 	new DefaultSessionFactoryImpl(matrixFactory, directedComponentFactory, layerFactory, neuralNetworkFactory, layredNeuralNetworkFactory);	
     
-	return sessionFactory.createSession().buildNeuralNetwork("mnist")
+	return sessionFactory.createSession().buildNeuralNetwork("mnist", new Neurons3D(28, 28, 1, false))
 		.withConvolutionalLayer("FirstLayer")
 			.withInputNeurons(new Neurons3D(28, 28 ,1, true))
 			.withWeightsMatrix(layer1Weights)
