@@ -22,6 +22,7 @@ import org.ml4j.nn.activationfunctions.DefaultSigmoidActivationFunctionImpl;
 import org.ml4j.nn.activationfunctions.factories.DifferentiableActivationFunctionFactory;
 import org.ml4j.nn.axons.AxonsConfig;
 import org.ml4j.nn.axons.factories.AxonsFactory;
+import org.ml4j.nn.components.DirectedComponentsContextImpl;
 import org.ml4j.nn.components.factories.DirectedComponentFactory;
 import org.ml4j.nn.demo.base.unsupervised.UnsupervisedNeuralNetworkDemoBase;
 import org.ml4j.nn.demo.util.MnistUtils;
@@ -62,7 +63,7 @@ public class AutoEncoderDemo
   }
 
   @Override
-  protected AutoEncoder createUnsupervisedNeuralNetwork(int featureCount) {
+  protected AutoEncoder createUnsupervisedNeuralNetwork(int featureCount, AutoEncoderContext autoEncoderContext) {
 
     // Construct a 2 layer AutoEncoder
     
@@ -72,7 +73,7 @@ public class AutoEncoderDemo
     
     DifferentiableActivationFunctionFactory activationFunctionFactory = new DefaultDifferentiableActivationFunctionFactory();
     
-    DirectedComponentFactory directedComponentFactory = new DefaultDirectedComponentFactoryImpl(matrixFactory, axonsFactory, activationFunctionFactory);
+    DirectedComponentFactory directedComponentFactory = new DefaultDirectedComponentFactoryImpl(matrixFactory, axonsFactory, activationFunctionFactory, autoEncoderContext.getDirectedComponentsContext());
     
     FeedForwardLayer<?, ?> encodingLayer = new FullyConnectedFeedForwardLayerImpl("EncodingLayer", directedComponentFactory, 
         axonsFactory, new AxonsConfig<>(new Neurons3D(28, 28 ,1, true), new Neurons(200, false)), 
@@ -100,7 +101,7 @@ public class AutoEncoderDemo
   }
 
   @Override
-  protected NeuronsActivation createTestSetDataNeuronActivations(MatrixFactory matrixFactory) {
+  protected NeuronsActivation createTestSetDataNeuronActivations(AutoEncoderContext autoEncoderContext) {
     LOGGER.trace("Creating test data NeuronsActivation");
     
     DoubleArrayMatrixLoader loader = new DoubleArrayMatrixLoader(
@@ -109,7 +110,7 @@ public class AutoEncoderDemo
     float[][] testDataMatrix = toFloatArray(loader.loadDoubleMatrixFromCsv("mnist2500_X_custom.csv",
         new PixelFeaturesMatrixCsvDataExtractor(), 1000, 2000));
 
-    return new NeuronsActivationImpl(new Neurons(testDataMatrix[0].length, false), matrixFactory.createMatrixFromRows(testDataMatrix).transpose(),
+    return new NeuronsActivationImpl(new Neurons(testDataMatrix[0].length, false), autoEncoderContext.getMatrixFactory().createMatrixFromRows(testDataMatrix).transpose(),
     		NeuronsActivationFormat.ROWS_SPAN_FEATURE_SET, true);
   }
   
@@ -129,20 +130,11 @@ public class AutoEncoderDemo
     return new JBlasRowMajorMatrixFactory();
   }
 
-  @Override
-  protected AutoEncoderContext createTrainingContext(AutoEncoder unsupervisedNeuralNetwork,
-      MatrixFactory matrixFactory) {
-    LOGGER.trace("Creating AutoEncoderContext");
-    // Train from layer index 0 to the end layer
-    AutoEncoderContext context = new AutoEncoderContextImpl(matrixFactory, 0, null, true);
-    context.setTrainingEpochs(400);
-    context.setTrainingLearningRate(0.1f);
-    return context;
-  }
+
 
   @Override
   protected void showcaseTrainedNeuralNetwork(AutoEncoder autoEncoder,
-      NeuronsActivation testDataInputActivations, MatrixFactory matrixFactory) throws Exception {
+      NeuronsActivation testDataInputActivations, AutoEncoderContext autoEncoderContext) throws Exception {
     LOGGER.info("Showcasing trained AutoEncoder...");
 
     // Create display for our demo
@@ -150,17 +142,17 @@ public class AutoEncoderDemo
     
     // Create a context for the first layer only
     AutoEncoderContext autoEncoderNeuronVisualisationContext =  
-        new AutoEncoderContextImpl(matrixFactory, 0, 0, false);
+        new AutoEncoderContextImpl(autoEncoderContext.getDirectedComponentsContext(), 0, 0, false);
     
     DirectedLayerContext hiddenNeuronInspectionContext = 
-        autoEncoderNeuronVisualisationContext.getLayerContext(0);
+    		autoEncoder.getLayer(0).getContext(autoEncoderContext.getDirectedComponentsContext().asNonTrainingContext());
     
     LOGGER.info("Drawing visualisations of patterns sought by the hidden neurons...");
     for (int j = 0; j < autoEncoder.getFirstLayer().getOutputNeuronCount(); j++) {
       NeuronsActivation neuronActivationMaximisingActivation = autoEncoder.getFirstLayer()
           .getOptimalInputForOutputNeuron(j, hiddenNeuronInspectionContext);
       float[] neuronActivationMaximisingFeatures =
-          neuronActivationMaximisingActivation.getActivations(matrixFactory).getRowByRowArray();
+          neuronActivationMaximisingActivation.getActivations(autoEncoderNeuronVisualisationContext.getMatrixFactory()).getRowByRowArray();
 
       float[] intensities = new float[neuronActivationMaximisingFeatures.length];
       for (int i = 0; i < intensities.length; i++) {
@@ -178,17 +170,17 @@ public class AutoEncoderDemo
     for (int i = 0; i < 100; i++) {
 
       // For each element in our test set, obtain the compressed encoded features
-      Matrix activations = testDataInputActivations.getActivations(matrixFactory).getColumn(i);
+      Matrix activations = testDataInputActivations.getActivations(autoEncoderNeuronVisualisationContext.getMatrixFactory()).getColumn(i);
       
       NeuronsActivation orignalActivation = new NeuronsActivationImpl(new Neurons(activations.getRows(), false), activations,
     		  NeuronsActivationFormat.ROWS_SPAN_FEATURE_SET);
       
       int featureCount = orignalActivation.getFeatureCount();
 
-      MnistUtils.draw(orignalActivation.getActivations(matrixFactory).getRowByRowArray(), display);
+      MnistUtils.draw(orignalActivation.getActivations(autoEncoderNeuronVisualisationContext.getMatrixFactory()).getRowByRowArray(), display);
 
       // Encode only through the first layer
-      AutoEncoderContext encodingContext = new AutoEncoderContextImpl(matrixFactory, 0, 0, false);
+      AutoEncoderContext encodingContext = new AutoEncoderContextImpl(autoEncoderNeuronVisualisationContext.getDirectedComponentsContext(), 0, 0, false);
 
       NeuronsActivation encodedFeatures = autoEncoder.encode(orignalActivation, encodingContext);
 
@@ -198,14 +190,14 @@ public class AutoEncoderDemo
       Thread.sleep(1000);
 
       // Decode only through the second layer
-      AutoEncoderContext decodingContext = new AutoEncoderContextImpl(matrixFactory, 1, 1, false);
+      AutoEncoderContext decodingContext = new AutoEncoderContextImpl(autoEncoderNeuronVisualisationContext.getDirectedComponentsContext(), 1, 1, false);
 
       // Now reconstruct the features again
       NeuronsActivation reconstructedFeatures =
           autoEncoder.decode(encodedFeatures, decodingContext);
       
       // Display the reconstructed input image
-      MnistUtils.draw(reconstructedFeatures.getActivations(matrixFactory).getRowByRowArray(), display);
+      MnistUtils.draw(reconstructedFeatures.getActivations(autoEncoderNeuronVisualisationContext.getMatrixFactory()).getRowByRowArray(), display);
       LOGGER.info("Decoded " + encodedFeatures.getFeatureCount() 
           + " features into an image with "  + reconstructedFeatures.getFeatureCount() 
           + " pixels");
@@ -213,4 +205,26 @@ public class AutoEncoderDemo
       Thread.sleep(1000);
     }
   }
+
+@Override
+protected AutoEncoderContext createNetworkCreationContext(MatrixFactory matrixFactory) {
+    return new AutoEncoderContextImpl(new DirectedComponentsContextImpl(matrixFactory, false), 0, null, false);
+}
+
+@Override
+protected AutoEncoderContext createTestContext(AutoEncoderContext trainingContext) {
+	trainingContext.setTrainingContext(false);
+	return trainingContext;
+}
+
+@Override
+protected AutoEncoderContext createTrainingContext(AutoEncoderContext networkCreationContext) {
+	networkCreationContext.setTrainingContext(true);
+	networkCreationContext.setTrainingEpochs(400);
+	networkCreationContext.setTrainingLearningRate(0.1f);
+	return networkCreationContext;
+}
+
+
+
 }
